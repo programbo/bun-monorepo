@@ -1,0 +1,35 @@
+{
+  "extends": "@<monorepo-name>/config/tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "outDir": "./dist",
+    "rootDir": ".",
+    "noEmit": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": false,
+    "strict": true,
+    "skipLibCheck": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "checkJs": true,
+    "paths": {
+      "@<monorepo-name>/config": ["./packages/config"],
+      "@<monorepo-name>/config/prettier": ["./packages/config/prettier"],
+      "@<monorepo-name>/config/oxlint": ["./packages/config/oxlint"]
+    }
+  },
+  "include": ["**/*"],
+  "exclude": ["node_modules", "dist", "build"]
+}

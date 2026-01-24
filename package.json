@@ -1,0 +1,24 @@
+{
+  "name": "bun-monorepo-template",
+  "version": "0.0.1",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "bun run --filter '*' dev",
+    "build": "bun run --filter '*' build",
+    "test": "bun run --filter '*' test",
+    "lint": "bun run --filter '*' lint",
+    "format": "bun run --filter '*' format",
+    "format:check": "bun run --filter '*' format:check",
+    "typecheck": "bun run --filter '*' typecheck",
+    "ci": "bun run lint && bun run typecheck"
+  },
+  "devDependencies": {
+    "@<monorepo-name>/config": "workspace:*",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
+    "oxlint": "^1.38.0",
+    "prettier": "^3.7.4",
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@<monorepo-name>/config",
+  "version": "0.0.1",
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
+    "bunup": "^0.16.17",
+    "oxlint": "^1.38.0",
+    "prettier": "^3.7.4",
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "typescript": "^5.9.3"
+  },
+  "description": "Shared configuration package - Prettier, ESLint, and TypeScript settings",
+  "files": [
+    "prettier/index.js",
+    "prettier/index-tailwind.js",
+    "oxlint/index.json"
+  ],
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  }
+}
