@@ -20,5 +20,16 @@
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "typescript": "^5.9.3"
+  },
+  "bun-create": {
+    "preinstall": [
+      "echo '🚀 Creating Bun Monorepo with binit...'",
+      "echo 'This will guide you through setting up your monorepo structure'"
+    ],
+    "postinstall": [
+      "echo '✅ Monorepo setup complete!'",
+      "echo 'Run \"bun run binit\" to start creating your apps and packages'"
+    ],
+    "start": "bun run binit"
   }
 }

@@ -13,14 +13,24 @@ A production-ready Bun monorepo template with workspace configuration, interacti
 
 ## Quick Start
 
-### 1. Initialize the Template
+### Using Bun Template System
+
+The easiest way to create a new monorepo is using Bun's built-in template system:
 
 ```bash
-bun init bun-monorepo-template
-cd bun-monorepo-template
+bun create mono my-monorepo
+cd my-monorepo
 ```
 
-### 2. Run the Interactive CLI
+This will:
+1. Copy the template files to `my-monorepo`
+2. Run preinstall scripts
+3. Install dependencies
+4. Run the binit CLI tool to guide you through setting up your monorepo structure
+
+### Using binit CLI
+
+After creating the monorepo, run the interactive setup:
 
 ```bash
 bun run binit
@@ -28,29 +38,12 @@ bun run binit
 
 The `binit` tool will guide you through creating your monorepo structure with interactive prompts.
 
-### 3. Install Dependencies
+### Manual Initialization
 
 ```bash
-bun install
-```
-
-### 4. Start Developing
-
-```bash
-# Run all workspaces
-bun run dev
-
-# Run specific workspace
-bun run --filter web-app dev
-
-# Type check all workspaces
-bun run typecheck
-
-# Lint all workspaces
-bun run lint
-
-# Format all workspaces
-bun run format
+bun init my-monorepo
+cd my-monorepo
+bun run binit
 ```
 
 ## Project Structure
@@ -215,6 +208,15 @@ If configuration isn't applying to workspaces:
 1. Ensure the config package is in `devDependencies`
 2. Check that `package.json` scripts reference the config package
 3. Verify workspace references use `workspace:*` syntax
+
+### Template Creation Issues
+
+If `bun create mono` fails:
+
+1. Verify the symlink exists: `ls -la ~/.bun-create/mono`
+2. Check that the template directory is accessible
+3. Ensure Bun is properly installed and configured
+4. Try running `bun create mono --help` for more information
 
 ## License
 
