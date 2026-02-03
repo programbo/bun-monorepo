@@ -30,6 +30,8 @@ Lightweight dev TUI (restart/quit/open keys):
 bun run dev:tui
 ```
 
+Starting another `dev:tui` for the same workspace set will signal the existing instance to restart.
+
 To run just the web app from the app directory:
 
 ```bash

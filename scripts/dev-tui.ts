@@ -1,6 +1,9 @@
 #!/usr/bin/env bun
 import { spawn } from 'bun'
-import { readFile } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
+import { existsSync } from 'node:fs'
+import { mkdir, readFile, rm } from 'node:fs/promises'
+import { connect, createServer, type Server } from 'node:net'
 import path from 'node:path'
 
 const ROOT_DIR = path.resolve(import.meta.dir, '..')
@@ -215,6 +218,14 @@ const main = async () => {
   const children = new Map<string, ReturnType<typeof spawn>>()
   const latestUrl = new Map<string, string>()
 
+  const socketId = createHash('sha1')
+    .update(workspaces.map((workspace) => workspace.dir).sort().join('|'))
+    .digest('hex')
+    .slice(0, 8)
+  const controlDir = path.join(ROOT_DIR, '.dev')
+  const controlSocket = path.join(controlDir, `dev-tui-${socketId}.sock`)
+  let controlServer: Server | null = null
+
   const startAll = () => {
     for (const workspace of workspaces) {
       const child = spawn(workspace.command, {
@@ -255,7 +266,56 @@ const main = async () => {
     restarting = false
   }
 
+  const handleControlMessage = async (message: string) => {
+    if (message === 'restart') {
+      await restartAll()
+      return
+    }
+    if (message === 'open') {
+      const first = workspaces.find((workspace) => latestUrl.has(workspace.name))
+      if (first) {
+        openBrowser(latestUrl.get(first.name) ?? '')
+      }
+      return
+    }
+    if (message === 'stop') {
+      await shutdown()
+    }
+  }
+
+  const tryNotifyExisting = async () => {
+    if (!existsSync(controlSocket)) return false
+    return await new Promise<boolean>((resolve) => {
+      const client = connect(controlSocket, () => {
+        client.write('restart')
+        client.end()
+        resolve(true)
+      })
+      client.on('error', () => resolve(false))
+    })
+  }
+
+  const startControlServer = async () => {
+    await mkdir(controlDir, { recursive: true })
+    if (existsSync(controlSocket)) {
+      await rm(controlSocket, { force: true })
+    }
+    controlServer = createServer((socket) => {
+      socket.on('data', (data) => {
+        void handleControlMessage(data.toString().trim())
+      })
+    })
+    controlServer.listen(controlSocket)
+  }
+
   const shutdown = async () => {
+    if (controlServer) {
+      await new Promise<void>((resolve) => controlServer?.close(() => resolve()))
+      controlServer = null
+    }
+    if (existsSync(controlSocket)) {
+      await rm(controlSocket, { force: true })
+    }
     await stopAll()
     process.exit(0)
   }
@@ -305,6 +365,12 @@ const main = async () => {
   console.log('Dev TUI: press r to restart, q to quit, o to open browser')
   console.log(`Workspaces: ${workspaces.map((workspace) => workspace.name).join(', ')}`)
 
+  if (await tryNotifyExisting()) {
+    console.log('Existing dev TUI detected: sent restart signal.')
+    process.exit(0)
+  }
+
+  await startControlServer()
   startAll()
 }
 
