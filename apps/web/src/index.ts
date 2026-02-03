@@ -1,8 +1,8 @@
-import { serve } from 'bun'
-import { connect, createServer, type Server } from 'node:net'
-import { existsSync } from 'node:fs'
 import { mkdir, rm } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import { connect, createServer, type Server } from 'node:net'
 import path from 'node:path'
+import { serve, type BunRequest } from 'bun'
 import index from './index.html'
 
 const DEFAULT_PORT = 3000
@@ -29,7 +29,8 @@ const isAddressInUse = (error: unknown) => {
   return false
 }
 
-const basePort = parsePort(process.env.PORT, 'PORT') ?? (DEFAULT_PORT + (parsePort(process.env.PORT_OFFSET, 'PORT_OFFSET') ?? 0))
+const basePort =
+  parsePort(process.env.PORT, 'PORT') ?? DEFAULT_PORT + (parsePort(process.env.PORT_OFFSET, 'PORT_OFFSET') ?? 0)
 
 const serverConfig = {
   routes: {
@@ -37,13 +38,13 @@ const serverConfig = {
     '/*': index,
 
     '/api/hello': {
-      async GET(_req) {
+      async GET(_req: BunRequest) {
         return Response.json({
           message: 'Hello, world!',
           method: 'GET',
         })
       },
-      async PUT(_req) {
+      async PUT(_req: BunRequest) {
         return Response.json({
           message: 'Hello, world!',
           method: 'PUT',
@@ -51,7 +52,7 @@ const serverConfig = {
       },
     },
 
-    '/api/hello/:name': async (req) => {
+    '/api/hello/:name': async (req: BunRequest) => {
       const name = req.params.name
       return Response.json({
         message: `Hello, ${name}!`,
@@ -93,7 +94,7 @@ const stopServer = () => {
 const restartServer = () => {
   const preferredPort = server.port
   stopServer()
-  server = startServer(preferredPort)
+  server = startServer(preferredPort ?? basePort)
   console.log(`🔁 Server restarted at ${server.url}`)
 }
 
@@ -143,11 +144,40 @@ const startControlServer = async () => {
   process.on('SIGTERM', () => void cleanup())
 }
 
+const setupKeyControls = () => {
+  const stdin = process.stdin
+  if (!stdin.isTTY) return
+
+  stdin.setRawMode(true)
+  stdin.resume()
+  stdin.setEncoding('utf8')
+
+  stdin.on('data', (chunk) => {
+    const key = chunk.toString()
+
+    if (key === 'q') {
+      stopServer()
+      process.exit(0)
+    }
+
+    if (key === 'r') {
+      restartServer()
+      return
+    }
+
+    if (key === '\u0003') {
+      stopServer()
+      process.exit(0)
+    }
+  })
+}
+
 if (await tryNotifyExisting()) {
   console.log('🔁 Existing server detected. Sent restart signal.')
   process.exit(0)
 }
 
 await startControlServer()
+setupKeyControls()
 
 console.log(`🚀 Server running at ${server.url}`)

@@ -42,6 +42,8 @@ Example:
 printf restart | nc -U .dev/web.sock
 ```
 
+When running in a TTY, you can also press `r` to restart or `q` to stop.
+
 ## Production
 
 From repo root:
