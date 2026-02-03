@@ -1,0 +1,26 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot src/index.ts",
+    "start": "NODE_ENV=production bun src/index.ts",
+    "build": "bun run build.ts",
+    "lint": "oxlint --fix .",
+    "format": "prettier --write .",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "bun-plugin-tailwind": "^0.1.2",
+    "react": "^19",
+    "react-dom": "^19",
+    "tailwindcss": "^4.1.11"
+  },
+  "devDependencies": {
+    "@repo/qa": "workspace:*",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@types/bun": "latest"
+  }
+}

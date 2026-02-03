@@ -1,0 +1,30 @@
+{
+  "name": "@repo/qa",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./prettier": "./prettier/prettier.config.cjs",
+    "./prettier-tailwind": "./prettier/tailwind.config.cjs",
+    "./oxlint": "./oxlint/oxlint.json",
+    "./tsconfig": "./tsconfig/tsconfig.base.json"
+  },
+  "files": [
+    "dist",
+    "oxlint",
+    "prettier",
+    "tsconfig"
+  ],
+  "scripts": {
+    "build": "bunup",
+    "lint": "oxlint --fix .",
+    "format": "prettier --write .",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "latest",
+    "bunup": "latest",
+    "prettier-plugin-tailwindcss": "latest",
+    "typescript": "latest"
+  }
+}

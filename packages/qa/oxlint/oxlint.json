@@ -1,0 +1,17 @@
+{
+  "$schema": "https://oxc.rs/schema/oxlint.json",
+  "rules": {
+    "correctness": "warn",
+    "suspicious": "warn",
+    "style": "warn",
+    "perf": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.*", "**/*.spec.*"],
+      "rules": {
+        "correctness/no-unused-vars": "off"
+      }
+    }
+  ]
+}

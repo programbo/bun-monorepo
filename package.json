@@ -1,35 +1,24 @@
 {
   "name": "bun-monorepo-template",
-  "version": "0.0.1",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "bun run --filter '*' dev",
-    "build": "bun run --filter '*' build",
-    "test": "bun run --filter '*' test",
-    "lint": "bun run --filter '*' lint",
-    "format": "bun run --filter '*' format",
-    "format:check": "bun run --filter '*' format:check",
-    "typecheck": "bun run --filter '*' typecheck",
-    "ci": "bun run lint && bun run typecheck"
+    "dev": "concurrently -n web,packages \"bun run --filter web dev\" \"bun run --filter @repo/qa build -- --watch\"",
+    "build": "bun run --filter @repo/qa build && bun run --filter web build",
+    "lint": "bun run --filter @repo/qa lint && bun run --filter web lint",
+    "typecheck": "bun run --filter @repo/qa typecheck && bun run --filter web typecheck",
+    "format": "bun run --filter @repo/qa format && bun run --filter web format",
+    "qa": "bun run lint && bun run typecheck && bun run format"
   },
   "devDependencies": {
-    "@<monorepo-name>/config": "workspace:*",
-    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
-    "oxlint": "^1.38.0",
-    "prettier": "^3.7.4",
-    "prettier-plugin-tailwindcss": "^0.7.2",
-    "typescript": "^5.9.3"
-  },
-  "bun-create": {
-    "preinstall": [
-      "echo '🚀 Creating Bun Monorepo with binit...'",
-      "echo 'This will guide you through setting up your monorepo structure'"
-    ],
-    "postinstall": [
-      "echo '✅ Monorepo setup complete!'",
-      "echo 'Run \"bun run binit\" to start creating your apps and packages'"
-    ],
-    "start": "bun run binit"
+    "@trivago/prettier-plugin-sort-imports": "latest",
+    "concurrently": "latest",
+    "oxlint": "latest",
+    "prettier": "latest",
+    "prettier-plugin-tailwindcss": "latest",
+    "typescript": "latest"
   }
 }
