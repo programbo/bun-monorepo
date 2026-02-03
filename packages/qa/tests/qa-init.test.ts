@@ -9,8 +9,8 @@ const QA_INIT = path.join(ROOT_DIR, "qa", "scripts", "qa-init.ts");
 const runQaInit = async (args: string[]) => {
   const proc = Bun.spawn(["bun", QA_INIT, ...args], {
     cwd: ROOT_DIR,
-    stdout: "ignore",
     stderr: "pipe",
+    stdout: "ignore",
   });
   const exitCode = await proc.exited;
   if (exitCode !== 0) {
@@ -28,8 +28,8 @@ const createTempPackage = async (name: string, extras: Record<string, unknown> =
   await mkdir(tempDir, { recursive: true });
   await writeJson(path.join(tempDir, "package.json"), {
     name,
-    version: "0.0.0",
     private: true,
+    version: "0.0.0",
     ...extras,
   });
   return tempDir;
@@ -57,7 +57,7 @@ describe("qa:init", () => {
       expect(existsSync(path.join(dir, "oxlint.json"))).toBeTrue();
       expect(existsSync(path.join(dir, "tsconfig.json"))).toBeTrue();
     } finally {
-      await rm(dir, { recursive: true, force: true });
+      await rm(dir, { force: true, recursive: true });
     }
   });
 
@@ -74,7 +74,7 @@ describe("qa:init", () => {
       const prettierConfig = await readFile(path.join(dir, "prettier.config.cjs"), "utf8");
       expect(prettierConfig).toContain("@repo/qa/prettier-tailwind");
     } finally {
-      await rm(dir, { recursive: true, force: true });
+      await rm(dir, { force: true, recursive: true });
     }
   });
 
@@ -97,7 +97,7 @@ describe("qa:init", () => {
       };
       expect(config.extends).toBe("@repo/qa/tsconfig/node");
     } finally {
-      await rm(dir, { recursive: true, force: true });
+      await rm(dir, { force: true, recursive: true });
     }
   });
 });

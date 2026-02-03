@@ -8,7 +8,8 @@
     "lint": "oxlint --config oxlint.json --fix .",
     "format": "prettier --config prettier.config.cjs --write .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "build": "bunup"
+    "build": "bunup",
+    "test": "bun test"
   },
   "devDependencies": {
     "@types/bun": "latest",
