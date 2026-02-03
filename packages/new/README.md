@@ -17,6 +17,7 @@ bun run new ui packages/neon-ui-2026
 - `cli`: `packages/<name>` from local templates, then runs `qa:init`.
 - `lib`: `packages/<name>` from local templates, then runs `qa:init`.
 - `ui`: `packages/<name>` from local templates, then runs `qa:init` with Tailwind.
+- All templates run `bun install` at the repo root when they finish scaffolding.
 
 ## Notes
 

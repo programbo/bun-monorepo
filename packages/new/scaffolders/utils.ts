@@ -74,6 +74,10 @@ export const runQaInit = async (targetDir: string, kind: 'web' | 'cli' | 'lib', 
   await run('bun', args, ROOT_DIR)
 }
 
+export const runWorkspaceInstall = async () => {
+  await run('bun', ['install'], ROOT_DIR)
+}
+
 export const ensureTargetDir = async (targetDir: string) => {
   await ensureEmptyDir(targetDir)
   if (!existsSync(targetDir)) {

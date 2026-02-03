@@ -1,5 +1,13 @@
 import path from 'node:path'
-import { ensureTargetDir, ensureTemplates, ROOT_DIR, run, runQaInit, updateWebAppContent } from './utils'
+import {
+  ensureTargetDir,
+  ensureTemplates,
+  ROOT_DIR,
+  run,
+  runQaInit,
+  runWorkspaceInstall,
+  updateWebAppContent,
+} from './utils'
 
 export const metadata = {
   defaultRoot: 'apps',
@@ -15,4 +23,5 @@ export const scaffoldWeb = async (targetDir: string) => {
   }
   await updateWebAppContent(targetDir)
   await runQaInit(targetDir, 'web', true)
+  await runWorkspaceInstall()
 }
