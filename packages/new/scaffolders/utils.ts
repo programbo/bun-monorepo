@@ -5,7 +5,7 @@ import path from 'node:path'
 export type AppType = 'web' | 'cli' | 'lib' | 'ui'
 export type DefaultRoot = 'apps' | 'packages'
 
-export const ROOT_DIR = path.resolve(import.meta.dir, '../..')
+export const ROOT_DIR = path.resolve(import.meta.dir, '../../..')
 export const BUN_CREATE_DIR = path.join(ROOT_DIR, '.bun-create')
 
 export const run = async (command: string, args: string[], cwd: string) => {

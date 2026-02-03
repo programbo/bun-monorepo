@@ -328,15 +328,6 @@ const main = async () => {
   console.log(`QA config applied to ${dir} (kind: ${resolvedKind}, tailwind: ${resolvedTailwind})`)
 }
 
-main().catch((error) => {
-  let message = String(error)
-  if (error instanceof Error) {
-    ;({ message } = error)
-  }
-  console.error(message)
-  process.exit(EXIT_FAILURE)
-})
-
 const applyQaScripts = (scripts: Record<string, string>, kind: Exclude<Kind, 'auto'>) => {
   scripts.lint = 'oxlint --config oxlint.json --fix .'
   scripts.format = 'prettier --config prettier.config.cjs --write .'
@@ -456,3 +447,12 @@ const resolveTailwind = (tailwind: boolean | undefined, pkg: Record<string, unkn
   }
   return detectTailwind(pkg) || kind === 'web'
 }
+
+main().catch((error) => {
+  let message = String(error)
+  if (error instanceof Error) {
+    ;({ message } = error)
+  }
+  console.error(message)
+  process.exit(EXIT_FAILURE)
+})
