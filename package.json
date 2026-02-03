@@ -6,15 +6,15 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently -n web,packages \"bun run --filter web dev\" \"bun run --filter @repo/qa build -- --watch\"",
-    "build": "bun run --filter @repo/qa build && bun run --filter web build",
+    "dev": "bun run --parallel --workspaces --if-present dev",
+    "build": "bun run --workspaces --if-present build",
     "lint": "bun run lint:all",
     "typecheck": "bun run typecheck:all",
     "format": "bun run format:all",
     "qa": "bun run lint:all && bun run typecheck:all && bun run format:all",
-    "lint:all": "bun run --filter './apps/*' lint:pkg && bun run --filter './packages/*' lint:pkg",
-    "typecheck:all": "bun run --filter './apps/*' typecheck:pkg && bun run --filter './packages/*' typecheck:pkg",
-    "format:all": "bun run --filter './apps/*' format:pkg && bun run --filter './packages/*' format:pkg",
+    "lint:all": "bun run --workspaces --if-present lint:pkg",
+    "typecheck:all": "bun run --workspaces --if-present typecheck:pkg",
+    "format:all": "bun run --workspaces --if-present format:pkg",
     "qa:init": "bun run packages/qa/scripts/qa-init.ts",
     "new": "bun run packages/new/index.ts"
   },

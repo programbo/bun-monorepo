@@ -18,13 +18,13 @@ bun install
 
 ## Development
 
-Run the web app dev server:
+Run all workspace dev servers (apps + packages):
 
 ```bash
-bun run --filter web dev
+bun run dev
 ```
 
-Or from the app directory:
+To run just the web app from the app directory:
 
 ```bash
 cd apps/web
