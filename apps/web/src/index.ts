@@ -1,5 +1,5 @@
 import { mkdir, rm } from 'node:fs/promises'
-import { existsSync } from 'node:fs'
+import { existsSync, createReadStream } from 'node:fs'
 import { connect, createServer, type Server } from 'node:net'
 import path from 'node:path'
 import { serve, type BunRequest } from 'bun'
@@ -145,14 +145,14 @@ const startControlServer = async () => {
 }
 
 const setupKeyControls = () => {
-  const stdin = process.stdin
-  if (!stdin.isTTY) return
+  const input = process.stdin.isTTY ? process.stdin : createReadStream('/dev/tty')
+  if (!input.isTTY) return
 
-  stdin.setRawMode(true)
-  stdin.resume()
-  stdin.setEncoding('utf8')
+  input.setRawMode(true)
+  input.resume()
+  input.setEncoding('utf8')
 
-  stdin.on('data', (chunk) => {
+  input.on('data', (chunk) => {
     const key = chunk.toString()
 
     if (key === 'q') {
