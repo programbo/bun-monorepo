@@ -18,6 +18,29 @@ bun add -d @repo/qa
 
 For TailwindCSS projects, use `@repo/qa/prettier-tailwind` instead of the base Prettier config.
 
+## QA Init Script
+
+From the repo root:
+
+```bash
+bun run qa:init --dir apps/web --kind auto
+bun run qa:init --dir packages/cli --kind cli
+bun run qa:init --dir packages/lib --kind lib
+```
+
+Options:
+- `--dir <path>` (required)
+- `--kind web|cli|lib|auto` (default: `auto`)
+- `--tailwind` (forces the Tailwind Prettier config)
+- `--force` (overwrite existing config files)
+
+Heuristics (when `--kind auto`):
+- `web` if `react`, `react-dom`, `next`, or `vite` is in deps/devDeps
+- `cli` if `bin` is present or package name contains `cli`
+- otherwise `lib`
+
+Tailwind is enabled automatically if `tailwindcss` is present.
+
 ### Web app integration (apps/web)
 
 1. Add config files:
