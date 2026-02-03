@@ -1,3 +1,3 @@
-import oxlintConfig from "../oxlint/oxlint.json";
+import oxlintConfig from '../oxlint/oxlint.json'
 
-export default oxlintConfig;
+export default oxlintConfig

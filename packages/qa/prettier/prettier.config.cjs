@@ -1,13 +1,6 @@
 /** @type {import('prettier').Config} */
 module.exports = {
   arrowParens: 'always',
-  singleQuote: true,
-  trailingComma: 'all',
-  printWidth: 120,
-  tabWidth: 2,
-  useTabs: false,
-  semi: false,
-  plugins: ['@trivago/prettier-plugin-sort-imports'],
   importOrder: [
     '^(react/(.*)$)|^(react$)',
     '^(next/(.*)$)|^(next$)',
@@ -25,4 +18,11 @@ module.exports = {
       },
     },
   ],
+  plugins: ['@trivago/prettier-plugin-sort-imports'],
+  printWidth: 120,
+  semi: false,
+  singleQuote: true,
+  tabWidth: 2,
+  trailingComma: 'all',
+  useTabs: false,
 }

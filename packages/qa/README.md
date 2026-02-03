@@ -24,7 +24,7 @@ For TailwindCSS projects, use `@repo/qa/prettier-tailwind` instead of the base P
 
 ```js
 // prettier.config.cjs
-module.exports = require("@repo/qa/prettier-tailwind");
+module.exports = require('@repo/qa/prettier-tailwind')
 ```
 
 ```json
@@ -51,9 +51,9 @@ module.exports = require("@repo/qa/prettier-tailwind");
 ```json
 {
   "scripts": {
-    "lint": "bun lint --fix",
-    "format": "bun format --write",
-    "typecheck": "bun typecheck --project tsconfig.json"
+    "lint": "oxlint --config oxlint.json --fix .",
+    "format": "prettier --config prettier.config.cjs --write .",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }
 ```
@@ -64,7 +64,7 @@ module.exports = require("@repo/qa/prettier-tailwind");
 
 ```js
 // prettier.config.cjs
-module.exports = require("@repo/qa/prettier");
+module.exports = require('@repo/qa/prettier')
 ```
 
 ```json
@@ -92,9 +92,9 @@ module.exports = require("@repo/qa/prettier");
 {
   "scripts": {
     "build": "bunup",
-    "lint": "bun lint --fix",
-    "format": "bun format --write",
-    "typecheck": "bun typecheck --project tsconfig.json"
+    "lint": "oxlint --config oxlint.json --fix .",
+    "format": "prettier --config prettier.config.cjs --write .",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }
 ```
@@ -102,15 +102,15 @@ module.exports = require("@repo/qa/prettier");
 3. Add a `bunup.config.ts`:
 
 ```ts
-import { defineConfig } from "bunup";
+import { defineConfig } from 'bunup'
 
 export default defineConfig({
-  entry: ["src/index.ts"],
-  outDir: "dist",
-  format: ["esm"],
-  target: "node",
+  entry: ['src/index.ts'],
+  outDir: 'dist',
+  format: ['esm'],
+  target: 'node',
   sourcemap: true,
-});
+})
 ```
 
 ### Library package integration (packages/lib)
@@ -119,7 +119,7 @@ export default defineConfig({
 
 ```js
 // prettier.config.cjs
-module.exports = require("@repo/qa/prettier");
+module.exports = require('@repo/qa/prettier')
 ```
 
 ```json
@@ -143,9 +143,9 @@ module.exports = require("@repo/qa/prettier");
 {
   "scripts": {
     "build": "bunup",
-    "lint": "bun lint --fix",
-    "format": "bun format --write",
-    "typecheck": "bun typecheck --project tsconfig.json"
+    "lint": "oxlint --config oxlint.json --fix .",
+    "format": "prettier --config prettier.config.cjs --write .",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }
 ```
@@ -153,14 +153,14 @@ module.exports = require("@repo/qa/prettier");
 3. Add a `bunup.config.ts`:
 
 ```ts
-import { defineConfig } from "bunup";
+import { defineConfig } from 'bunup'
 
 export default defineConfig({
-  entry: ["src/index.ts"],
-  outDir: "dist",
-  format: ["esm", "cjs"],
-  target: "node",
+  entry: ['src/index.ts'],
+  outDir: 'dist',
+  format: ['esm', 'cjs'],
+  target: 'node',
   sourcemap: true,
   dts: true,
-});
+})
 ```

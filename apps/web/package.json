@@ -7,9 +7,9 @@
     "dev": "bun --hot src/index.ts",
     "start": "NODE_ENV=production bun src/index.ts",
     "build": "bun run build.ts",
-    "lint": "oxlint --fix .",
-    "format": "prettier --write .",
-    "typecheck": "tsc -p tsconfig.json"
+    "lint": "oxlint --config oxlint.json --fix .",
+    "format": "prettier --config prettier.config.cjs --write .",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "bun-plugin-tailwind": "^0.1.2",

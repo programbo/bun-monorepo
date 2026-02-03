@@ -8,9 +8,9 @@
   "scripts": {
     "dev": "concurrently -n web,packages \"bun run --filter web dev\" \"bun run --filter @repo/qa build -- --watch\"",
     "build": "bun run --filter @repo/qa build && bun run --filter web build",
-    "lint": "bun run --filter @repo/qa lint && bun run --filter web lint",
-    "typecheck": "bun run --filter @repo/qa typecheck && bun run --filter web typecheck",
-    "format": "bun run --filter @repo/qa format && bun run --filter web format",
+    "lint": "bun run --filter './apps/*' lint && bun run --filter './packages/*' lint",
+    "typecheck": "bun run --filter './apps/*' typecheck && bun run --filter './packages/*' typecheck",
+    "format": "bun run --filter './apps/*' format && bun run --filter './packages/*' format",
     "qa": "bun run lint && bun run typecheck && bun run format"
   },
   "devDependencies": {

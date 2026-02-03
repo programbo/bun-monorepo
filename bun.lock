@@ -35,6 +35,8 @@
       "devDependencies": {
         "@trivago/prettier-plugin-sort-imports": "latest",
         "bunup": "latest",
+        "oxlint": "latest",
+        "prettier": "latest",
         "prettier-plugin-tailwindcss": "latest",
         "typescript": "latest",
       },

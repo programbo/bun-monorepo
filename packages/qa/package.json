@@ -17,13 +17,15 @@
   ],
   "scripts": {
     "build": "bunup",
-    "lint": "oxlint --fix .",
-    "format": "prettier --write .",
-    "typecheck": "tsc -p tsconfig.json"
+    "lint": "oxlint --config oxlint/oxlint.json --fix .",
+    "format": "prettier --config prettier/prettier.config.cjs --write .",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "latest",
     "bunup": "latest",
+    "oxlint": "latest",
+    "prettier": "latest",
     "prettier-plugin-tailwindcss": "latest",
     "typescript": "latest"
   }

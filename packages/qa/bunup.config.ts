@@ -1,14 +1,9 @@
-import { defineConfig } from "bunup";
+import { defineConfig } from 'bunup'
 
 export default defineConfig({
-  entry: [
-    "src/oxlint.ts",
-    "src/prettier.ts",
-    "src/prettier-tailwind.ts",
-    "src/tsconfig.ts",
-  ],
-  outDir: "dist",
-  format: ["esm"],
-  target: "node",
+  entry: ['src/oxlint.ts', 'src/prettier.ts', 'src/prettier-tailwind.ts', 'src/tsconfig.ts'],
+  format: ['esm'],
+  outDir: 'dist',
   sourcemap: true,
-});
+  target: 'node',
+})

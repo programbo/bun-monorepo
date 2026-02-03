@@ -1,6 +1,6 @@
 {
   "$schema": "https://oxc.rs/schema/oxlint.json",
-  "rules": {
+  "categories": {
     "correctness": "warn",
     "suspicious": "warn",
     "style": "warn",
@@ -10,7 +10,7 @@
     {
       "files": ["**/*.test.*", "**/*.spec.*"],
       "rules": {
-        "correctness/no-unused-vars": "off"
+        "no-unused-vars": "off"
       }
     }
   ]

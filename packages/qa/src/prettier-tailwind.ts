@@ -1,1 +1,1 @@
-export { default } from "../prettier/tailwind.config.cjs";
+export { default } from '../prettier/tailwind.config.cjs'

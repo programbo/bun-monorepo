@@ -30,9 +30,9 @@ bun dev
 
 All apps and packages use the shared QA package. Each workspace should include scripts to run:
 
-- `bun lint --fix`
-- `bun format --write`
-- `bun typecheck --project tsconfig.json`
+- `oxlint --config oxlint.json --fix .`
+- `prettier --config prettier.config.cjs --write .`
+- `tsc -p tsconfig.json --noEmit`
 
 Integration details and templates live in `packages/qa/README.md`.
 

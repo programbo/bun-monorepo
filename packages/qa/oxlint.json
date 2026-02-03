@@ -1,22 +1,22 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "rules": {
+  "categories": {
     "correctness": "warn",
     "suspicious": "warn",
     "style": "warn",
     "perf": "warn",
     "restriction": "off"
   },
-  "deny": [
-    "typescript/no-explicit-any",
-    "typescript/no-non-null-assertion",
-    "typescript/use-unknown-in-catch-callback-variable"
-  ],
+  "rules": {
+    "typescript/no-explicit-any": "error",
+    "typescript/no-non-null-assertion": "error",
+    "typescript/use-unknown-in-catch-callback-variable": "error"
+  },
   "overrides": [
     {
       "files": ["**/*.test.*", "**/*.spec.*"],
       "rules": {
-        "correctness/no-unused-vars": "off"
+        "no-unused-vars": "off"
       }
     }
   ]
