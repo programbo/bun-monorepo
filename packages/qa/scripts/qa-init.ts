@@ -1,14 +1,16 @@
 #!/usr/bin/env bun
-import { existsSync } from "fs";
-import { mkdir, readFile, writeFile } from "fs/promises";
-import path from "path";
+import { existsSync } from "node:fs";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
 
 const USAGE = `
 Usage:
   bun run qa:init --dir <path> [--kind web|cli|lib|auto] [--tailwind] [--force]
+  bun run qa:init <path> [--kind web|cli|lib|auto] [--tailwind] [--force]
 
 Examples:
   bun run qa:init --dir apps/web --kind auto
+  bun run qa:init apps/web --kind auto
   bun run qa:init --dir packages/cli --kind cli
   bun run qa:init --dir packages/lib --kind lib
 `;
@@ -32,6 +34,11 @@ const parseArgs = (): Options => {
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
     if (!arg) continue;
+
+    if (!arg.startsWith("--") && !options.dir) {
+      options.dir = arg;
+      continue;
+    }
 
     if (arg === "--dir") {
       options.dir = args[i + 1];
@@ -72,9 +79,62 @@ const ensureDir = async (dir: string) => {
   await mkdir(dir, { recursive: true });
 };
 
+const stripJsonComments = (input: string) => {
+  let output = "";
+  let inString = false;
+  let stringChar = "";
+  let i = 0;
+
+  while (i < input.length) {
+    const char = input[i];
+    const next = input[i + 1];
+
+    if (inString) {
+      output += char;
+      if (char === "\\" && next) {
+        output += next;
+        i += 2;
+        continue;
+      }
+      if (char === stringChar) {
+        inString = false;
+      }
+      i += 1;
+      continue;
+    }
+
+    if (char === "\"" || char === "'") {
+      inString = true;
+      stringChar = char;
+      output += char;
+      i += 1;
+      continue;
+    }
+
+    if (char === "/" && next === "/") {
+      i += 2;
+      while (i < input.length && input[i] !== "\n") i += 1;
+      continue;
+    }
+
+    if (char === "/" && next === "*") {
+      i += 2;
+      while (i < input.length && !(input[i] === "*" && input[i + 1] === "/")) i += 1;
+      i += 2;
+      continue;
+    }
+
+    output += char;
+    i += 1;
+  }
+
+  return output;
+};
+
 const readJson = async <T>(filePath: string): Promise<T> => {
   const contents = await readFile(filePath, "utf8");
-  return JSON.parse(contents) as T;
+  const cleaned = stripJsonComments(contents);
+  return JSON.parse(cleaned) as T;
 };
 
 const writeJson = async (filePath: string, data: unknown) => {
@@ -128,6 +188,11 @@ const detectKind = (pkg: Record<string, unknown>): Exclude<Kind, "auto"> => {
 const detectTailwind = (pkg: Record<string, unknown>) => {
   const { deps, devDeps } = coerceDeps(pkg);
   return Boolean(deps.tailwindcss || devDeps.tailwindcss);
+};
+
+const detectReact = (pkg: Record<string, unknown>) => {
+  const { deps, devDeps } = coerceDeps(pkg);
+  return Boolean(deps.react || devDeps.react);
 };
 
 const ensurePackageJson = async (
@@ -188,18 +253,19 @@ const ensureOxlintConfig = async (dir: string, force: boolean) => {
   await writeJson(configPath, config);
 };
 
-const ensureTsconfig = async (dir: string, kind: Exclude<Kind, "auto">, force: boolean) => {
+const resolveTsconfigPreset = (kind: Exclude<Kind, "auto">, pkg: Record<string, unknown>) => {
+  if (kind === "web") return "@repo/qa/tsconfig/web";
+  const isReact = detectReact(pkg);
+  if (isReact) return "@repo/qa/tsconfig/react-lib";
+  return "@repo/qa/tsconfig/node";
+};
+
+const ensureTsconfig = async (dir: string, kind: Exclude<Kind, "auto">, pkg: Record<string, unknown>, force: boolean) => {
+  const preset = resolveTsconfigPreset(kind, pkg);
   const configPath = path.join(dir, "tsconfig.json");
   if (!existsSync(configPath)) {
-    const compilerOptions: Record<string, unknown> = {};
-    if (kind === "web") {
-      compilerOptions.lib = ["ESNext", "DOM"];
-      compilerOptions.jsx = "react-jsx";
-    }
-
     const contents = {
-      extends: "@repo/qa/tsconfig",
-      compilerOptions,
+      extends: preset,
     };
 
     await writeJson(configPath, contents);
@@ -208,14 +274,14 @@ const ensureTsconfig = async (dir: string, kind: Exclude<Kind, "auto">, force: b
 
   if (force) {
     const existing = await readJson<Record<string, unknown>>(configPath);
-    existing.extends = "@repo/qa/tsconfig";
+    existing.extends = preset;
     await writeJson(configPath, existing);
     return;
   }
 
   const existing = await readJson<Record<string, unknown>>(configPath);
   if (!existing.extends) {
-    existing.extends = "@repo/qa/tsconfig";
+    existing.extends = preset;
   }
   await writeJson(configPath, existing);
 };
@@ -256,12 +322,12 @@ const main = async () => {
 
   const { data: pkg } = await getPackageJson(dir);
   const resolvedKind = options.kind === "auto" ? detectKind(pkg) : options.kind;
-  const resolvedTailwind = options.tailwind ?? detectTailwind(pkg) || resolvedKind === "web";
+  const resolvedTailwind = options.tailwind ?? (detectTailwind(pkg) || resolvedKind === "web");
 
   await ensurePackageJson(dir, pkg, resolvedKind);
   await ensurePrettierConfig(dir, resolvedTailwind, options.force);
   await ensureOxlintConfig(dir, options.force);
-  await ensureTsconfig(dir, resolvedKind, options.force);
+  await ensureTsconfig(dir, resolvedKind, pkg, options.force);
   await ensureBunupConfig(dir, resolvedKind, options.force);
 
   console.log(`QA config applied to ${dir} (kind: ${resolvedKind}, tailwind: ${resolvedTailwind})`);

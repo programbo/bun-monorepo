@@ -1,7 +1,9 @@
 #!/usr/bin/env bun
-import { existsSync } from "fs";
-import { mkdir, readdir, writeFile } from "fs/promises";
-import path from "path";
+import { metadata as cliMeta, scaffoldCli } from "./scaffolders/cli";
+import { metadata as libMeta, scaffoldLib } from "./scaffolders/lib";
+import { metadata as uiMeta, scaffoldUi } from "./scaffolders/ui";
+import { metadata as webMeta, scaffoldWeb } from "./scaffolders/web";
+import { resolveTarget, type AppType } from "./scaffolders/utils";
 
 const USAGE = `
 Usage:
@@ -9,74 +11,10 @@ Usage:
 
 Types:
   web   Creates a Bun React + Tailwind app in apps/<name>
+  cli   Creates a CLI package in packages/<name>
+  lib   Creates a library package in packages/<name>
+  ui    Creates a Tailwind UI library in packages/<name> (via bun create)
 `.trim();
-
-type AppType = "web";
-
-const ROOT_DIR = path.resolve(import.meta.dir, "../..");
-
-const run = async (command: string, args: string[], cwd: string) => {
-  const proc = Bun.spawn([command, ...args], {
-    cwd,
-    stdin: "inherit",
-    stdout: "inherit",
-    stderr: "inherit",
-  });
-  const exitCode = await proc.exited;
-  if (exitCode !== 0) {
-    throw new Error(`Command failed: ${command} ${args.join(" ")}`);
-  }
-};
-
-const ensureEmptyDir = async (dir: string) => {
-  if (!existsSync(dir)) return;
-  const entries = await readdir(dir);
-  if (entries.length > 0) {
-    throw new Error(`Target directory is not empty: ${dir}`);
-  }
-};
-
-const resolveTarget = (type: AppType, name: string) => {
-  if (type === "web") {
-    return path.join(ROOT_DIR, "apps", name);
-  }
-  throw new Error(`Unsupported type: ${type}`);
-};
-
-const updateWebAppContent = async (targetDir: string) => {
-  const candidates = [
-    path.join(targetDir, "src", "App.tsx"),
-    path.join(targetDir, "src", "App.jsx"),
-    path.join(targetDir, "src", "app.tsx"),
-    path.join(targetDir, "src", "app.jsx"),
-  ];
-
-  const appFile = candidates.find(candidate => existsSync(candidate));
-  if (!appFile) {
-    throw new Error("Unable to locate App component to update.");
-  }
-
-  const contents = `export default function App() {
-  return (
-    <main className="min-h-screen bg-white text-slate-900">
-      <div className="mx-auto max-w-3xl px-6 py-20">
-        <h1 className="text-3xl font-semibold">Welcome</h1>
-        <p className="mt-4 text-base text-slate-600">
-          This is a fresh Bun + React + Tailwind app. Build something great.
-        </p>
-      </div>
-    </main>
-  );
-}
-`;
-
-  await writeFile(appFile, contents, "utf8");
-};
-
-const runQaInit = async (targetDir: string) => {
-  const relative = path.relative(ROOT_DIR, targetDir);
-  await run("bun", ["run", "qa:init", "--dir", relative, "--kind", "web", "--tailwind"], ROOT_DIR);
-};
 
 const main = async () => {
   const [, , typeArg, nameArg] = process.argv;
@@ -85,21 +23,27 @@ const main = async () => {
     process.exit(1);
   }
 
-  if (typeArg !== "web") {
+  if (!["web", "cli", "lib", "ui"].includes(typeArg)) {
     throw new Error(`Unsupported type: ${typeArg}`);
   }
 
   const type = typeArg as AppType;
-  const targetDir = resolveTarget(type, nameArg);
-  await ensureEmptyDir(targetDir);
+  const metadata: Record<AppType, { defaultRoot: "apps" | "packages" }> = {
+    web: webMeta,
+    cli: cliMeta,
+    lib: libMeta,
+    ui: uiMeta,
+  };
 
-  if (!existsSync(targetDir)) {
-    await mkdir(targetDir, { recursive: true });
-  }
+  const targetDir = resolveTarget(nameArg, metadata[type].defaultRoot);
+  const handlers: Record<AppType, (dir: string) => Promise<void>> = {
+    web: scaffoldWeb,
+    cli: scaffoldCli,
+    lib: scaffoldLib,
+    ui: scaffoldUi,
+  };
 
-  await run("bun", ["init", "--react=tailwind"], targetDir);
-  await updateWebAppContent(targetDir);
-  await runQaInit(targetDir);
+  await handlers[type](targetDir);
 
   console.log(`Created ${type} app at ${targetDir}`);
 };

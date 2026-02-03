@@ -1,0 +1,7 @@
+{
+  "extends": "@repo/qa/tsconfig/node",
+  "compilerOptions": {
+    "moduleResolution": "bundler"
+  },
+  "include": ["src/**/*"]
+}

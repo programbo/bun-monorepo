@@ -1,5 +1,5 @@
 {
-  "extends": "@repo/qa/tsconfig",
+  "extends": "@repo/qa/tsconfig/web",
   "compilerOptions": {
     "lib": ["ESNext", "DOM"],
     "jsx": "react-jsx",

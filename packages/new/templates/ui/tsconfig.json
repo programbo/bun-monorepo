@@ -1,0 +1,4 @@
+{
+  "extends": "@repo/qa/tsconfig/react-lib",
+  "include": ["src/**/*"]
+}

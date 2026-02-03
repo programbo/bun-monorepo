@@ -7,7 +7,10 @@
     "./prettier": "./prettier/prettier.config.cjs",
     "./prettier-tailwind": "./prettier/tailwind.config.cjs",
     "./oxlint": "./oxlint/oxlint.json",
-    "./tsconfig": "./tsconfig/tsconfig.base.json"
+    "./tsconfig": "./tsconfig/tsconfig.base.json",
+    "./tsconfig/node": "./tsconfig/tsconfig.node.json",
+    "./tsconfig/web": "./tsconfig/tsconfig.web.json",
+    "./tsconfig/react-lib": "./tsconfig/tsconfig.react-lib.json"
   },
   "files": [
     "dist",
@@ -19,10 +22,13 @@
     "build": "bunup",
     "lint": "oxlint --config oxlint/oxlint.json --fix .",
     "format": "prettier --config prettier/prettier.config.cjs --write .",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "bun test"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "latest",
+    "@types/bun": "latest",
+    "@types/node": "latest",
     "bunup": "latest",
     "oxlint": "latest",
     "prettier": "latest",
