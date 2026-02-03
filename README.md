@@ -24,7 +24,7 @@ Run all workspace dev servers (apps + packages):
 bun run dev
 ```
 
-Lightweight dev TUI (restart/quit keys):
+Lightweight dev TUI (restart/quit/open keys):
 
 ```bash
 bun run dev:tui
