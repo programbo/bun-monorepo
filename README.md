@@ -24,6 +24,12 @@ Run all workspace dev servers (apps + packages):
 bun run dev
 ```
 
+Lightweight dev TUI (restart/quit keys):
+
+```bash
+bun run dev:tui
+```
+
 To run just the web app from the app directory:
 
 ```bash
