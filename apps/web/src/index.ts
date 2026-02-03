@@ -1,8 +1,14 @@
 import { serve } from 'bun'
+import { connect, createServer, type Server } from 'node:net'
+import { existsSync } from 'node:fs'
+import { mkdir, rm } from 'node:fs/promises'
+import path from 'node:path'
 import index from './index.html'
 
 const DEFAULT_PORT = 3000
 const MAX_PORT = 65_535
+const CONTROL_DIR = path.resolve(import.meta.dir, '..', '..', '.dev')
+const CONTROL_SOCKET = path.join(CONTROL_DIR, 'web.sock')
 
 const parsePort = (value: string | undefined, label: string) => {
   if (!value) return undefined
@@ -78,6 +84,70 @@ const startServer = (startPort: number) => {
   throw new Error(`No available port found starting from ${startPort}`)
 }
 
-const server = startServer(basePort)
+let server = startServer(basePort)
+
+const stopServer = () => {
+  server.stop(true)
+}
+
+const restartServer = () => {
+  const preferredPort = server.port
+  stopServer()
+  server = startServer(preferredPort)
+  console.log(`🔁 Server restarted at ${server.url}`)
+}
+
+const handleControlMessage = (message: string) => {
+  if (message === 'restart') {
+    restartServer()
+    return
+  }
+  if (message === 'stop') {
+    stopServer()
+    process.exit(0)
+  }
+}
+
+const tryNotifyExisting = async () => {
+  if (!existsSync(CONTROL_SOCKET)) return false
+  return await new Promise<boolean>((resolve) => {
+    const client = connect(CONTROL_SOCKET, () => {
+      client.write('restart')
+      client.end()
+      resolve(true)
+    })
+    client.on('error', () => resolve(false))
+  })
+}
+
+const startControlServer = async () => {
+  await mkdir(CONTROL_DIR, { recursive: true })
+  if (existsSync(CONTROL_SOCKET)) {
+    await rm(CONTROL_SOCKET, { force: true })
+  }
+  const controlServer: Server = createServer((socket) => {
+    socket.on('data', (data) => {
+      handleControlMessage(data.toString().trim())
+    })
+  })
+  controlServer.listen(CONTROL_SOCKET)
+
+  const cleanup = async () => {
+    await new Promise<void>((resolve) => controlServer.close(() => resolve()))
+    if (existsSync(CONTROL_SOCKET)) {
+      await rm(CONTROL_SOCKET, { force: true })
+    }
+  }
+
+  process.on('SIGINT', () => void cleanup())
+  process.on('SIGTERM', () => void cleanup())
+}
+
+if (await tryNotifyExisting()) {
+  console.log('🔁 Existing server detected. Sent restart signal.')
+  process.exit(0)
+}
+
+await startControlServer()
 
 console.log(`🚀 Server running at ${server.url}`)
