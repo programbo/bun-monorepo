@@ -8,14 +8,18 @@
   "scripts": {
     "dev": "concurrently -n web,packages \"bun run --filter web dev\" \"bun run --filter @repo/qa build -- --watch\"",
     "build": "bun run --filter @repo/qa build && bun run --filter web build",
-    "lint": "bun run --filter './apps/*' lint && bun run --filter './packages/*' lint",
-    "typecheck": "bun run --filter './apps/*' typecheck && bun run --filter './packages/*' typecheck",
-    "format": "bun run --filter './apps/*' format && bun run --filter './packages/*' format",
-    "qa": "bun run lint && bun run typecheck && bun run format",
+    "lint": "bun run lint:all",
+    "typecheck": "bun run typecheck:all",
+    "format": "bun run format:all",
+    "qa": "bun run lint:all && bun run typecheck:all && bun run format:all",
+    "lint:all": "bun run --filter './apps/*' lint:pkg && bun run --filter './packages/*' lint:pkg",
+    "typecheck:all": "bun run --filter './apps/*' typecheck:pkg && bun run --filter './packages/*' typecheck:pkg",
+    "format:all": "bun run --filter './apps/*' format:pkg && bun run --filter './packages/*' format:pkg",
     "qa:init": "bun run packages/qa/scripts/qa-init.ts",
     "new": "bun run packages/new/index.ts"
   },
   "devDependencies": {
+    "@repo/qa": "workspace:*",
     "@trivago/prettier-plugin-sort-imports": "latest",
     "concurrently": "latest",
     "oxlint": "latest",

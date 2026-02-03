@@ -20,9 +20,13 @@
   ],
   "scripts": {
     "build": "bunup",
-    "lint": "oxlint --config oxlint/oxlint.json --fix .",
-    "format": "prettier --config prettier/prettier.config.cjs --write .",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "bun run --cwd ../../ lint:all",
+    "format": "bun run --cwd ../../ format:all",
+    "typecheck": "bun run --cwd ../../ typecheck:all",
+    "qa": "bun run --cwd ../../ qa",
+    "lint:pkg": "oxlint --config oxlint/oxlint.json --fix .",
+    "format:pkg": "prettier --config prettier/prettier.config.cjs --write .",
+    "typecheck:pkg": "tsc -p tsconfig.json --noEmit",
     "test": "bun test"
   },
   "devDependencies": {

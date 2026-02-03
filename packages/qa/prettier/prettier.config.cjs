@@ -2,6 +2,9 @@
 module.exports = {
   arrowParens: 'always',
   importOrder: [
+    '^node:fs/promises$',
+    '^node:fs$',
+    '^node:(.*)$',
     '^(react/(.*)$)|^(react$)',
     '^(next/(.*)$)|^(next$)',
     '<THIRD_PARTY_MODULES>',

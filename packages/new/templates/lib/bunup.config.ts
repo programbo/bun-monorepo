@@ -1,10 +1,10 @@
-import { defineConfig } from "bunup";
+import { defineConfig } from 'bunup'
 
 export default defineConfig({
-  entry: ["src/index.ts"],
-  outDir: "dist",
-  format: ["esm", "cjs"],
-  target: "node",
+  entry: ['src/index.ts'],
+  outDir: 'dist',
+  format: ['esm', 'cjs'],
+  target: 'node',
   sourcemap: true,
-  dts: true
-});
+  dts: true,
+})

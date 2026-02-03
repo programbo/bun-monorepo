@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
-    "lib": [
-      "ESNext"
-    ],
+    "lib": ["ESNext"],
     "target": "ESNext",
     "module": "Preserve",
     "moduleDetection": "force",
@@ -21,5 +19,6 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  "extends": "@repo/qa/tsconfig/node"
+  "extends": "@repo/qa/tsconfig/node",
+  "exclude": ["templates", "bunup.config.ts"]
 }

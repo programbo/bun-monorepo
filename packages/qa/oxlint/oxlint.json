@@ -1,10 +1,13 @@
 {
-  "$schema": "https://oxc.rs/schema/oxlint.json",
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
   "categories": {
     "correctness": "warn",
     "suspicious": "warn",
     "style": "warn",
     "perf": "warn"
+  },
+  "rules": {
+    "sort-imports": "off"
   },
   "overrides": [
     {

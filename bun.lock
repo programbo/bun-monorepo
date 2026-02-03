@@ -5,6 +5,7 @@
     "": {
       "name": "bun-react-template",
       "devDependencies": {
+        "@repo/qa": "workspace:*",
         "@trivago/prettier-plugin-sort-imports": "latest",
         "concurrently": "latest",
         "oxlint": "latest",
@@ -35,6 +36,7 @@
         "@repo/qa": "workspace:*",
         "@types/bun": "latest",
         "@types/node": "latest",
+        "bunup": "latest",
       },
       "peerDependencies": {
         "typescript": "^5",
@@ -52,27 +54,6 @@
         "prettier": "latest",
         "prettier-plugin-tailwindcss": "latest",
         "typescript": "latest",
-      },
-    },
-    "packages/ui": {
-      "name": "@repo/ui",
-      "version": "0.1.0",
-      "dependencies": {
-        "tailwind-merge": "latest",
-        "tailwind-variants": "latest",
-      },
-      "devDependencies": {
-        "@repo/qa": "workspace:*",
-        "@types/bun": "latest",
-        "@types/node": "latest",
-        "@types/react": "^19",
-        "bunup": "latest",
-        "react": "^19",
-        "react-dom": "^19",
-      },
-      "peerDependencies": {
-        "react": ">=18",
-        "react-dom": ">=18",
       },
     },
   },
@@ -255,8 +236,6 @@
 
     "@repo/qa": ["@repo/qa@workspace:packages/qa"],
 
-    "@repo/ui": ["@repo/ui@workspace:packages/ui"],
-
     "@trivago/prettier-plugin-sort-imports": ["@trivago/prettier-plugin-sort-imports@6.0.2", "", { "dependencies": { "@babel/generator": "^7.28.0", "@babel/parser": "^7.28.0", "@babel/traverse": "^7.28.0", "@babel/types": "^7.28.0", "javascript-natural-sort": "^0.7.1", "lodash-es": "^4.17.21", "minimatch": "^9.0.0", "parse-imports-exports": "^0.2.4" }, "peerDependencies": { "@vue/compiler-sfc": "3.x", "prettier": "2.x - 3.x", "prettier-plugin-ember-template-tag": ">= 2.0.0", "prettier-plugin-svelte": "3.x", "svelte": "4.x || 5.x" }, "optionalPeers": ["@vue/compiler-sfc", "prettier-plugin-ember-template-tag", "prettier-plugin-svelte", "svelte"] }, "sha512-3DgfkukFyC/sE/VuYjaUUWoFfuVjPK55vOFDsxD56XXynFMCZDYFogH2l/hDfOsQAm1myoU/1xByJ3tWqtulXA=="],
 
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg=="],
@@ -394,10 +373,6 @@
     "strip-json-comments": ["strip-json-comments@5.0.3", "", {}, "sha512-1tB5mhVo7U+ETBKNf92xT4hrQa3pm0MZ0PQvuDnWgAAGHDsfp4lPSpiS6psrSiet87wyGPh9ft6wmhOMQ0hDiw=="],
 
     "supports-color": ["supports-color@8.1.1", "", { "dependencies": { "has-flag": "^4.0.0" } }, "sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q=="],
-
-    "tailwind-merge": ["tailwind-merge@3.4.0", "", {}, "sha512-uSaO4gnW+b3Y2aWoWfFpX62vn2sR3skfhbjsEnaBI81WD1wBLlHZe5sWf0AqjksNdYTbGBEd0UasQMT3SNV15g=="],
-
-    "tailwind-variants": ["tailwind-variants@3.2.2", "", { "peerDependencies": { "tailwind-merge": ">=3.0.0", "tailwindcss": "*" }, "optionalPeers": ["tailwind-merge"] }, "sha512-Mi4kHeMTLvKlM98XPnK+7HoBPmf4gygdFmqQPaDivc3DpYS6aIY6KiG/PgThrGvii5YZJqRsPz0aPyhoFzmZgg=="],
 
     "tailwindcss": ["tailwindcss@4.1.18", "", {}, "sha512-4+Z+0yiYyEtUVCScyfHCxOYP06L5Ne+JiHhY2IjR2KWMIWhJOYZKLSGZaP5HkZ8+bY0cxfzwDE5uOmzFXyIwxw=="],
 

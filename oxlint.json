@@ -1,3 +1,4 @@
 {
-  "extends": "@brutalfuture/config/oxlint/index.json"
+  "$schema": "https://oxc.rs/schema/oxlint.json",
+  "extends": ["@repo/qa/oxlint"]
 }

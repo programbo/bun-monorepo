@@ -30,12 +30,14 @@ bun run qa:init --dir packages/lib --kind lib
 ## Presets
 
 Exported presets:
+
 - `@repo/qa/tsconfig` (base)
 - `@repo/qa/tsconfig/node`
 - `@repo/qa/tsconfig/web`
 - `@repo/qa/tsconfig/react-lib`
 
 `qa:init` uses:
+
 - `web` → `@repo/qa/tsconfig/web`
 - `cli`/`lib` → `@repo/qa/tsconfig/node`
 - React library packages → `@repo/qa/tsconfig/react-lib`
