@@ -1,7 +1,12 @@
-# bun-monorepo-template
+# bun-monorepo
 
 This repository is a Bun workspaces monorepo. The existing React + Tailwind app lives in `apps/web`.
 Shared QA config lives in `packages/qa`.
+
+## Repo Defaults
+
+- Root oxlint configuration lives in `oxlint.json` and uses the local schema path for editor tooling.
+- `packages/new` provides scaffolding for apps and packages with QA defaults applied.
 
 ## Setup
 

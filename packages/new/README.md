@@ -22,3 +22,4 @@ bun run new ui packages/neon-ui-2026
 
 - You can pass a full path like `packages/foo` to control the destination.
 - Templates live in `packages/new/templates` and are exposed via the `.bun-create` symlink.
+- Set `BUN_NEW_WEB_TEMPLATE=1` to scaffold web apps from the local template (useful for tests/offline work).

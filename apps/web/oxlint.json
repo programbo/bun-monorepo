@@ -1,4 +1,4 @@
 {
-  "$schema": "https://oxc.rs/schema/oxlint.json",
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
   "extends": ["@repo/qa/oxlint"]
 }

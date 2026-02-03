@@ -246,7 +246,7 @@ const ensureOxlintConfig = async (dir: string, force: boolean) => {
   const configPath = path.join(dir, 'oxlint.json')
   if (!existsSync(configPath) || force) {
     const contents = `{
-  "$schema": "https://oxc.rs/schema/oxlint.json",
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
   "extends": ["@repo/qa/oxlint"]
 }\n`
     await writeFile(configPath, contents, 'utf8')
@@ -371,7 +371,7 @@ const updateOxlintConfig = async (configPath: string) => {
     extendsField.push('@repo/qa/oxlint')
   }
 
-  config.$schema = 'https://oxc.rs/schema/oxlint.json'
+  config.$schema = './node_modules/oxlint/configuration_schema.json'
   config.extends = extendsField
   await writeJson(configPath, config)
 }
