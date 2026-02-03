@@ -5,10 +5,12 @@ export const metadata = {
   defaultRoot: 'packages',
 } as const
 
-export const scaffoldUi = async (targetDir: string) => {
+export const scaffoldUi = async (targetDir: string, options: { install: boolean }) => {
   await ensureTargetDir(targetDir)
   ensureTemplates()
   await run('bun', ['create', 'ui', path.relative(ROOT_DIR, targetDir), '--no-install', '--no-git'], ROOT_DIR)
   await runQaInit(targetDir, 'lib', true)
-  await runWorkspaceInstall()
+  if (options.install) {
+    await runWorkspaceInstall()
+  }
 }

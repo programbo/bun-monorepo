@@ -61,10 +61,10 @@ describe('new scaffolds', () => {
       TMP: bunTmpDir,
       BUN_NEW_WEB_TEMPLATE: '1',
     }
-    await run(['run', 'new', 'web', path.relative(ROOT_DIR, webDir)], ROOT_DIR, env)
-    await run(['run', 'new', 'cli', path.relative(ROOT_DIR, cliDir)], ROOT_DIR, env)
-    await run(['run', 'new', 'lib', path.relative(ROOT_DIR, libDir)], ROOT_DIR, env)
-    await run(['run', 'new', 'ui', path.relative(ROOT_DIR, uiDir)], ROOT_DIR, env)
+    await run(['run', 'new', 'web', path.relative(ROOT_DIR, webDir), '--no-install'], ROOT_DIR, env)
+    await run(['run', 'new', 'cli', path.relative(ROOT_DIR, cliDir), '--no-install'], ROOT_DIR, env)
+    await run(['run', 'new', 'lib', path.relative(ROOT_DIR, libDir), '--no-install'], ROOT_DIR, env)
+    await run(['run', 'new', 'ui', path.relative(ROOT_DIR, uiDir), '--no-install'], ROOT_DIR, env)
   })
 
   afterAll(async () => {

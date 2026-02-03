@@ -7,7 +7,7 @@ import { metadata as webMeta, scaffoldWeb } from './scaffolders/web'
 
 const USAGE = `
 Usage:
-  bun run new <type> <name>
+  bun run new <type> <name> [--no-install]
 
 Types:
   web   Creates a Bun React + Tailwind app in apps/<name>
@@ -17,7 +17,8 @@ Types:
 `.trim()
 
 const main = async () => {
-  const [, , typeArg, nameArg] = process.argv
+  const args = process.argv.slice(2)
+  const [typeArg, nameArg, ...rest] = args
   if (!typeArg || !nameArg) {
     console.log(USAGE)
     process.exit(1)
@@ -36,14 +37,16 @@ const main = async () => {
   }
 
   const targetDir = resolveTarget(nameArg, metadata[type].defaultRoot)
-  const handlers: Record<AppType, (dir: string) => Promise<void>> = {
+  const install = !rest.includes('--no-install')
+  const options = { install }
+  const handlers: Record<AppType, (dir: string, options: { install: boolean }) => Promise<void>> = {
     web: scaffoldWeb,
     cli: scaffoldCli,
     lib: scaffoldLib,
     ui: scaffoldUi,
   }
 
-  await handlers[type](targetDir)
+  await handlers[type](targetDir, options)
 
   console.log(`Created ${type} app at ${targetDir}`)
 }

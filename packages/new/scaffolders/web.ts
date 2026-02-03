@@ -13,7 +13,7 @@ export const metadata = {
   defaultRoot: 'apps',
 } as const
 
-export const scaffoldWeb = async (targetDir: string) => {
+export const scaffoldWeb = async (targetDir: string, options: { install: boolean }) => {
   await ensureTargetDir(targetDir)
   if (process.env.BUN_NEW_WEB_TEMPLATE === '1') {
     ensureTemplates()
@@ -23,5 +23,7 @@ export const scaffoldWeb = async (targetDir: string) => {
   }
   await updateWebAppContent(targetDir)
   await runQaInit(targetDir, 'web', true)
-  await runWorkspaceInstall()
+  if (options.install) {
+    await runWorkspaceInstall()
+  }
 }
