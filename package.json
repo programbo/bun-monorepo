@@ -12,7 +12,8 @@
     "typecheck": "bun run --filter './apps/*' typecheck && bun run --filter './packages/*' typecheck",
     "format": "bun run --filter './apps/*' format && bun run --filter './packages/*' format",
     "qa": "bun run lint && bun run typecheck && bun run format",
-    "qa:init": "bun run packages/qa/scripts/qa-init.ts"
+    "qa:init": "bun run packages/qa/scripts/qa-init.ts",
+    "new": "bun run packages/new/index.ts"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "latest",
