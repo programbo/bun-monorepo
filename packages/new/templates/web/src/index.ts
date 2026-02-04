@@ -102,7 +102,7 @@ const restartServer = () => {
 const handleControlMessage = (message: string) => {
   if (message === 'restart') {
     restartServer()
-    return 'ok'
+    return `ok:${server.url}`
   }
   if (message === 'stop') {
     stopServer()
@@ -203,8 +203,9 @@ const setupKeyControls = () => {
 
 const restartAck = await tryNotifyExisting()
 if (restartAck) {
-  if (restartAck === 'ok') {
-    console.log('🔁 Existing server detected. Restarted successfully.')
+  if (restartAck.startsWith('ok:')) {
+    const url = restartAck.slice(3)
+    console.log(`🔁 Existing server detected. Restarted successfully at ${url}`)
   } else {
     console.log(`⚠️ Existing server detected. Restart failed: ${restartAck}`)
   }
