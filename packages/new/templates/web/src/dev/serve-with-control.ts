@@ -165,25 +165,28 @@ const startServerWithAwareness = async (
   allowRestartExisting: boolean,
 ) => {
   let port = startPort
+  let replacedExisting = false
   while (port <= MAX_PORT) {
     const known = runningServers.get(port)
     if (known) {
       const label = known.id === currentId ? '🟢' : '🔵'
       console.log(`${label} Existing "${known.name}" server detected on port ${port}.`)
       if (allowRestartExisting && known.id === currentId) {
-        const restartAck = await sendControlCommand(known.socket, 'restart')
-        if (restartAck && restartAck.startsWith('ok:')) {
-          const url = restartAck.slice(3)
-          console.log(`♻️ Restarted successfully at ${url}`)
+        const stopAck = await sendControlCommand(known.socket, 'stop')
+        if (stopAck && stopAck.startsWith('ok')) {
+          replacedExisting = true
         } else {
-          console.log(`⚠️ Restart failed: ${restartAck ?? 'unknown error'}`)
+          console.log(`⚠️ Restart failed: ${stopAck ?? 'unknown error'}`)
         }
-        process.exit(0)
       }
     }
 
     try {
-      return serve({ ...config, port } as Bun.Serve.Options<undefined>)
+      const started = serve({ ...config, port } as Bun.Serve.Options<undefined>)
+      if (replacedExisting) {
+        console.log(`♻️ Restarted successfully at ${started.url}`)
+      }
+      return started
     } catch (error) {
       if (isAddressInUse(error)) {
         if (!known) {
@@ -208,9 +211,17 @@ export const serveWithControl = async (
 
   const runningServers = await discoverRunningServers(controlDir)
   let server = await startServerWithAwareness(config, basePort, serverId, serverName, runningServers, true)
+  let controlCleanup: (() => Promise<void>) | null = null
 
   const stopServer = () => {
     server.stop(true)
+  }
+
+  const shutdown = async () => {
+    stopServer()
+    if (controlCleanup) {
+      await controlCleanup()
+    }
     process.exit(0)
   }
 
@@ -232,24 +243,24 @@ export const serveWithControl = async (
     await rm(controlSocket, { force: true })
   }
 
-  const controlServer: Server = createServer((socket) => {
-    socket.on('data', (data) => {
-      try {
-        const message = data.toString().trim()
-        if (message === 'restart') {
-          void restartServer()
-          socket.write(`ok:${server.url}`)
-          return
-        }
-        if (message === 'stop') {
-          socket.write('ok')
-          stopServer()
-          return
-        }
-        if (message === 'info') {
-          socket.write(JSON.stringify({ id: serverId, name: serverName, port: server.port, url: server.url }))
-          return
-        }
+    const controlServer: Server = createServer((socket) => {
+      socket.on('data', (data) => {
+        try {
+          const message = data.toString().trim()
+          if (message === 'restart') {
+            void restartServer()
+            socket.write(`ok:${server.url}`)
+            return
+          }
+          if (message === 'stop') {
+            socket.write('ok')
+            void shutdown()
+            return
+          }
+          if (message === 'info') {
+            socket.write(JSON.stringify({ id: serverId, name: serverName, port: server.port, url: server.url }))
+            return
+          }
         socket.write('error:unknown-command')
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
@@ -265,13 +276,14 @@ export const serveWithControl = async (
       await rm(controlSocket, { force: true })
     }
   }
+  controlCleanup = cleanup
 
   process.on('SIGINT', () => void cleanup())
   process.on('SIGTERM', () => void cleanup())
 
-  setupKeyControls(() => void restartServer(), stopServer, openBrowser)
+  setupKeyControls(() => void restartServer(), () => void shutdown(), openBrowser)
   console.log(`🔌 Control socket: ${path.relative(process.cwd(), controlSocket)}`)
-  console.log('⌨️ Controls: press r to restart, q to quit, o to open browser')
+  console.log('🎹 Controls: press r to restart, q to quit, o to open browser')
 
   return server
 }

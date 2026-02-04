@@ -148,25 +148,28 @@ const startServer = async (
   allowRestartExisting: boolean,
 ) => {
   let port = startPort
+  let replacedExisting = false
   while (port <= MAX_PORT) {
     const known = runningServers.get(port)
     if (known) {
       const label = known.id === currentId ? '🟢' : '🔵'
       console.log(`${label} Existing "${known.name}" server detected on port ${port}.`)
       if (allowRestartExisting && known.id === currentId) {
-        const restartAck = await sendControlCommand(known.socket, 'restart')
-        if (restartAck && restartAck.startsWith('ok:')) {
-          const url = restartAck.slice(3)
-          console.log(`♻️ Restarted successfully at ${url}`)
+        const stopAck = await sendControlCommand(known.socket, 'stop')
+        if (stopAck && stopAck.startsWith('ok')) {
+          replacedExisting = true
         } else {
-          console.log(`⚠️ Restart failed: ${restartAck ?? 'unknown error'}`)
+          console.log(`⚠️ Restart failed: ${stopAck ?? 'unknown error'}`)
         }
-        process.exit(0)
       }
     }
 
     try {
-      return serve({ ...serverConfig, port })
+      const started = serve({ ...serverConfig, port })
+      if (replacedExisting) {
+        console.log(`♻️ Restarted successfully at ${started.url}`)
+      }
+      return started
     } catch (error) {
       if (isAddressInUse(error)) {
         if (!known) {
@@ -182,9 +185,18 @@ const startServer = async (
 }
 
 let server: ReturnType<typeof serve>
+let controlCleanup: (() => Promise<void>) | null = null
 
 const stopServer = () => {
   server.stop(true)
+}
+
+const shutdown = async () => {
+  stopServer()
+  if (controlCleanup) {
+    await controlCleanup()
+  }
+  process.exit(0)
 }
 
 const restartServer = async (currentId: string, currentName: string) => {
@@ -195,14 +207,19 @@ const restartServer = async (currentId: string, currentName: string) => {
   console.log(`🔁 Server restarted at ${server.url}`)
 }
 
+const openBrowser = () => {
+  const command = process.platform === 'darwin' ? 'open' : 'xdg-open'
+  spawn([command, server.url.toString()], { stdout: 'ignore', stderr: 'ignore' })
+}
+
 const handleControlMessage = (message: string, currentId: string, currentName: string) => {
   if (message === 'restart') {
     void restartServer(currentId, currentName)
     return `ok:${server.url}`
   }
   if (message === 'stop') {
-    stopServer()
-    process.exit(0)
+    void shutdown()
+    return 'ok'
   }
   if (message === 'info') {
     return JSON.stringify({ id: currentId, name: currentName, port: server.port, url: server.url })
@@ -236,6 +253,7 @@ const startControlServer = async (controlSocket: string, currentId: string, curr
       await rm(controlSocket, { force: true })
     }
   }
+  controlCleanup = cleanup
 
   process.on('SIGINT', () => void cleanup())
   process.on('SIGTERM', () => void cleanup())
@@ -263,8 +281,7 @@ const setupKeyControls = (currentId: string, currentName: string, controlSocket:
     const key = chunk.toString()
 
     if (key === 'q') {
-      stopServer()
-      process.exit(0)
+      void shutdown()
     }
 
     if (key === 'r') {
@@ -273,14 +290,12 @@ const setupKeyControls = (currentId: string, currentName: string, controlSocket:
     }
 
     if (key === 'o') {
-      const command = process.platform === 'darwin' ? ['open', server.url] : ['xdg-open', server.url]
-      spawn(command, { stdout: 'ignore', stderr: 'ignore' })
+      openBrowser()
       return
     }
 
     if (key === '\u0003') {
-      stopServer()
-      process.exit(0)
+      void shutdown()
     }
   })
 }
@@ -295,9 +310,8 @@ setupKeyControls(serverId, serverName, controlSocket)
 
 console.log(`🚀 Server running at ${server.url}`)
 console.log(`🔌 Control socket: ${path.relative(process.cwd(), controlSocket)}`)
-console.log('⌨️ Controls: press r to restart, q to quit, o to open browser')
+console.log('🎹 Controls: press r to restart, q to quit, o to open browser')
 
 if (process.env.OPEN_BROWSER === '1') {
-  const command = process.platform === 'darwin' ? ['open', server.url] : ['xdg-open', server.url]
-  spawn(command, { stdout: 'ignore', stderr: 'ignore' })
+  openBrowser()
 }
