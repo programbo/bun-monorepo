@@ -1,10 +1,10 @@
-import { serve, spawn } from 'bun'
-import { connect, createServer, type Server } from 'node:net'
+import { mkdir, readdir, rm } from 'node:fs/promises'
 import { existsSync, openSync } from 'node:fs'
 import { createHash } from 'node:crypto'
-import { mkdir, readdir, rm } from 'node:fs/promises'
+import { connect, createServer, type Server } from 'node:net'
 import path from 'node:path'
 import tty from 'node:tty'
+import { serve, spawn } from 'bun'
 
 const DEFAULT_PORT = 3000
 const MAX_PORT = 65_535
@@ -60,23 +60,7 @@ const createControlPaths = async (controlSocket?: string) => {
   return { controlDir: path.dirname(resolved), controlSocket: resolved }
 }
 
-const startServer = (config: Parameters<typeof serve>[0], startPort: number) => {
-  let port = startPort
-  while (port <= MAX_PORT) {
-    try {
-      return serve({ ...config, port } as Bun.Serve.Options<undefined>)
-    } catch (error) {
-      if (isAddressInUse(error)) {
-        port += 1
-        continue
-      }
-      throw error
-    }
-  }
-  throw new Error(`No available port found starting from ${startPort}`)
-}
-
-const setupKeyControls = (onRestart: () => void, onStop: () => void) => {
+const setupKeyControls = (onRestart: () => void, onStop: () => void, onOpenBrowser: () => void) => {
   let input: tty.ReadStream
   if (process.stdin.isTTY) {
     input = process.stdin as tty.ReadStream
@@ -107,8 +91,7 @@ const setupKeyControls = (onRestart: () => void, onStop: () => void) => {
     }
 
     if (key === 'o') {
-      const command = process.platform === 'darwin' ? ['open', server.url] : ['xdg-open', server.url]
-      spawn(command, { stdout: 'ignore', stderr: 'ignore' })
+      onOpenBrowser()
       return
     }
 
@@ -215,7 +198,10 @@ const startServerWithAwareness = async (
   throw new Error(`No available port found starting from ${startPort}`)
 }
 
-export const serveWithControl = async (config: Parameters<typeof serve>[0] & { port?: number }, options?: { controlSocket?: string }) => {
+export const serveWithControl = async (
+  config: Parameters<typeof serve>[0] & { port?: number },
+  options?: { controlSocket?: string },
+) => {
   const basePort = resolveBasePort(config.port)
   const { id: serverId, name: serverName } = await resolveServerInfo()
   const { controlDir, controlSocket } = await createControlPaths(options?.controlSocket)
@@ -234,6 +220,11 @@ export const serveWithControl = async (config: Parameters<typeof serve>[0] & { p
     const current = await discoverRunningServers(controlDir)
     server = await startServerWithAwareness(config, preferredPort, serverId, serverName, current, false)
     console.log(`🔁 Server restarted at ${server.url}`)
+  }
+
+  const openBrowser = () => {
+    const command = process.platform === 'darwin' ? 'open' : 'xdg-open'
+    spawn([command, server.url.toString()], { stdout: 'ignore', stderr: 'ignore' })
   }
 
   await mkdir(controlDir, { recursive: true })
@@ -278,7 +269,7 @@ export const serveWithControl = async (config: Parameters<typeof serve>[0] & { p
   process.on('SIGINT', () => void cleanup())
   process.on('SIGTERM', () => void cleanup())
 
-  setupKeyControls(() => void restartServer(), stopServer)
+  setupKeyControls(() => void restartServer(), stopServer, openBrowser)
   console.log(`🔌 Control socket: ${path.relative(process.cwd(), controlSocket)}`)
   console.log('⌨️ Controls: press r to restart, q to quit, o to open browser')
 
