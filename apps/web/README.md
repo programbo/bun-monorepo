@@ -31,7 +31,7 @@ You can also set `PORT` to force a starting port or `PORT_OFFSET` to start at `3
 
 ## Restart Signaling
 
-The server listens on a local Unix socket at `.dev/web.sock` and accepts:
+The server listens on a local Unix socket at `.dev/<package-name>-<hash>.sock` and accepts:
 
 - `restart`: restart the server in-place
 - `stop`: stop the server
@@ -39,7 +39,7 @@ The server listens on a local Unix socket at `.dev/web.sock` and accepts:
 Example:
 
 ```bash
-printf restart | nc -U .dev/web.sock
+printf restart | nc -U .dev/<package-name>-<hash>.sock
 ```
 
 When running in a TTY, you can also press `r` to restart or `q` to stop.

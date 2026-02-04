@@ -1,5 +1,6 @@
 import { mkdir, rm } from 'node:fs/promises'
 import { existsSync, openSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { connect, createServer, type Server } from 'node:net'
 import path from 'node:path'
 import tty from 'node:tty'
@@ -32,10 +33,25 @@ const resolveBasePort = (explicit?: number) => {
   return parsePort(process.env.PORT, 'PORT') ?? DEFAULT_PORT + (parsePort(process.env.PORT_OFFSET, 'PORT_OFFSET') ?? 0)
 }
 
-const createControlPaths = (controlSocket?: string) => {
+const resolveServerId = async () => {
+  try {
+    const pkgPath = path.resolve(process.cwd(), 'package.json')
+    const contents = await Bun.file(pkgPath).text()
+    const pkg = JSON.parse(contents) as { name?: string }
+    const baseName = pkg.name ?? path.basename(process.cwd())
+    const hash = createHash('sha1').update(process.cwd()).digest('hex').slice(0, 6)
+    return `${baseName}-${hash}`
+  } catch {
+    const hash = createHash('sha1').update(process.cwd()).digest('hex').slice(0, 6)
+    return `${path.basename(process.cwd())}-${hash}`
+  }
+}
+
+const createControlPaths = async (controlSocket?: string) => {
   const root = process.cwd()
   const defaultDir = path.join(root, '.dev')
-  const defaultSocket = path.join(defaultDir, 'web.sock')
+  const serverId = await resolveServerId()
+  const defaultSocket = path.join(defaultDir, `${serverId}.sock`)
   if (!controlSocket) {
     return { controlDir: defaultDir, controlSocket: defaultSocket }
   }
@@ -100,7 +116,7 @@ export const serveWithControl = async (
   options?: { controlSocket?: string },
 ) => {
   const basePort = resolveBasePort(config.port)
-  const { controlDir, controlSocket } = createControlPaths(options?.controlSocket)
+  const { controlDir, controlSocket } = await createControlPaths(options?.controlSocket)
 
   const tryNotifyExisting = async () => {
     if (!existsSync(controlSocket)) return false

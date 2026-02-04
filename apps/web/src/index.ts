@@ -1,5 +1,6 @@
-import { mkdir, rm } from 'node:fs/promises'
+import { mkdir, readFile, rm } from 'node:fs/promises'
 import { existsSync, openSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { connect, createServer, type Server } from 'node:net'
 import path from 'node:path'
 import tty from 'node:tty'
@@ -9,7 +10,21 @@ import index from './index.html'
 const DEFAULT_PORT = 3000
 const MAX_PORT = 65_535
 const CONTROL_DIR = path.resolve(import.meta.dir, '..', '..', '.dev')
-const CONTROL_SOCKET = path.join(CONTROL_DIR, 'web.sock')
+
+const resolveServerId = async () => {
+  try {
+    const pkgPath = path.resolve(process.cwd(), 'package.json')
+    const contents = await readFile(pkgPath, 'utf8')
+    const pkg = JSON.parse(contents) as { name?: string }
+    const baseName = pkg.name ?? path.basename(process.cwd())
+    const hash = createHash('sha1').update(process.cwd()).digest('hex').slice(0, 6)
+    return `${baseName}-${hash}`
+  } catch {
+    // ignore
+  }
+  const hash = createHash('sha1').update(process.cwd()).digest('hex').slice(0, 6)
+  return `${path.basename(process.cwd())}-${hash}`
+}
 
 const parsePort = (value: string | undefined, label: string) => {
   if (!value) return undefined
@@ -111,10 +126,10 @@ const handleControlMessage = (message: string) => {
   return 'error:unknown-command'
 }
 
-const tryNotifyExisting = async () => {
-  if (!existsSync(CONTROL_SOCKET)) return false
+const tryNotifyExisting = async (controlSocket: string) => {
+  if (!existsSync(controlSocket)) return false
   return await new Promise<false | string>((resolve) => {
-    const client = connect(CONTROL_SOCKET, () => {
+    const client = connect(controlSocket, () => {
       client.write('restart')
     })
     const timeout = setTimeout(() => {
@@ -133,10 +148,10 @@ const tryNotifyExisting = async () => {
   })
 }
 
-const startControlServer = async () => {
+const startControlServer = async (controlSocket: string) => {
   await mkdir(CONTROL_DIR, { recursive: true })
-  if (existsSync(CONTROL_SOCKET)) {
-    await rm(CONTROL_SOCKET, { force: true })
+  if (existsSync(controlSocket)) {
+    await rm(controlSocket, { force: true })
   }
   const controlServer: Server = createServer((socket) => {
     socket.on('data', (data) => {
@@ -151,12 +166,12 @@ const startControlServer = async () => {
       }
     })
   })
-  controlServer.listen(CONTROL_SOCKET)
+  controlServer.listen(controlSocket)
 
   const cleanup = async () => {
     await new Promise<void>((resolve) => controlServer.close(() => resolve()))
-    if (existsSync(CONTROL_SOCKET)) {
-      await rm(CONTROL_SOCKET, { force: true })
+    if (existsSync(controlSocket)) {
+      await rm(controlSocket, { force: true })
     }
   }
 
@@ -201,7 +216,9 @@ const setupKeyControls = () => {
   })
 }
 
-const restartAck = await tryNotifyExisting()
+const serverId = await resolveServerId()
+const controlSocket = path.join(CONTROL_DIR, `${serverId}.sock`)
+const restartAck = await tryNotifyExisting(controlSocket)
 if (restartAck) {
   if (restartAck.startsWith('ok:')) {
     const url = restartAck.slice(3)
@@ -212,7 +229,7 @@ if (restartAck) {
   process.exit(0)
 }
 
-await startControlServer()
+await startControlServer(controlSocket)
 setupKeyControls()
 
 console.log(`🚀 Server running at ${server.url}`)
