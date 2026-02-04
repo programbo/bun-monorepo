@@ -294,8 +294,8 @@ await startControlServer(controlSocket, serverId, serverName)
 setupKeyControls(serverId, serverName, controlSocket)
 
 console.log(`🚀 Server running at ${server.url}`)
+console.log(`Control socket: ${path.relative(process.cwd(), controlSocket)}`)
 console.log('Controls: press r to restart, q to quit, o to open browser')
-console.log(`🔌 Control socket: ${path.relative(process.cwd(), controlSocket)}`)
 
 if (process.env.OPEN_BROWSER === '1') {
   const command = process.platform === 'darwin' ? ['open', server.url] : ['xdg-open', server.url]
