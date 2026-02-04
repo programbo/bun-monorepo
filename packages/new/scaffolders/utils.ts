@@ -1,4 +1,4 @@
-import { mkdir, readdir, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
@@ -89,4 +89,41 @@ export const ensureTemplates = () => {
   if (!existsSync(BUN_CREATE_DIR)) {
     throw new Error('Missing .bun-create directory at repo root. Run bun install or bun run -w new postinstall.')
   }
+}
+
+const readJson = async <TData>(filePath: string): Promise<TData> => {
+  const contents = await readFile(filePath, 'utf8')
+  return JSON.parse(contents) as TData
+}
+
+const writeJson = async (filePath: string, data: unknown) => {
+  const contents = `${JSON.stringify(data, undefined, 2)}\n`
+  await writeFile(filePath, contents, 'utf8')
+}
+
+const resolveProjectName = async () => {
+  const pkgPath = path.join(ROOT_DIR, 'package.json')
+  if (!existsSync(pkgPath)) {
+    return 'project'
+  }
+  const pkg = await readJson<{ name?: string }>(pkgPath)
+  const raw = pkg.name ?? 'project'
+  const withoutScope = raw.startsWith('@') ? raw.split('/').pop() ?? raw : raw
+  return withoutScope
+}
+
+const resolvePackageName = (targetDir: string) => {
+  const relative = path.relative(ROOT_DIR, targetDir).replace(/\\/g, '/')
+  const cleaned = relative.replace(/^(apps|packages)\//, '')
+  return cleaned.split('/').filter(Boolean).join('-')
+}
+
+export const updatePackageName = async (targetDir: string) => {
+  const pkgPath = path.join(targetDir, 'package.json')
+  if (!existsSync(pkgPath)) return
+  const pkg = await readJson<Record<string, unknown>>(pkgPath)
+  const projectName = await resolveProjectName()
+  const packageName = resolvePackageName(targetDir)
+  pkg.name = `@${projectName}/${packageName}`
+  await writeJson(pkgPath, pkg)
 }
