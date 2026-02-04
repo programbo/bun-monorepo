@@ -1,4 +1,4 @@
-import { mkdir, readFile, rm } from 'node:fs/promises'
+import { mkdir, readdir, rm } from 'node:fs/promises'
 import { existsSync, openSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { connect, createServer, type Server } from 'node:net'
@@ -11,19 +11,19 @@ const DEFAULT_PORT = 3000
 const MAX_PORT = 65_535
 const CONTROL_DIR = path.resolve(import.meta.dir, '..', '..', '.dev')
 
-const resolveServerId = async () => {
+const resolveServerInfo = async () => {
   try {
     const pkgPath = path.resolve(process.cwd(), 'package.json')
-    const contents = await readFile(pkgPath, 'utf8')
+    const contents = await Bun.file(pkgPath).text()
     const pkg = JSON.parse(contents) as { name?: string }
-    const baseName = pkg.name ?? path.basename(process.cwd())
+    const name = pkg.name ?? path.basename(process.cwd())
     const hash = createHash('sha1').update(process.cwd()).digest('hex').slice(0, 6)
-    return `${baseName}-${hash}`
+    return { id: `${name}-${hash}`, name }
   } catch {
-    // ignore
+    const name = path.basename(process.cwd())
+    const hash = createHash('sha1').update(process.cwd()).digest('hex').slice(0, 6)
+    return { id: `${name}-${hash}`, name }
   }
-  const hash = createHash('sha1').update(process.cwd()).digest('hex').slice(0, 6)
-  return `${path.basename(process.cwd())}-${hash}`
 }
 
 const parsePort = (value: string | undefined, label: string) => {
@@ -85,52 +85,10 @@ const serverConfig = {
   },
 } as const
 
-const startServer = (startPort: number) => {
-  let port = startPort
-  while (port <= MAX_PORT) {
-    try {
-      return serve({ ...serverConfig, port })
-    } catch (error) {
-      if (isAddressInUse(error)) {
-        port += 1
-        continue
-      }
-      throw error
-    }
-  }
-  throw new Error(`No available port found starting from ${startPort}`)
-}
-
-let server = startServer(basePort)
-
-const stopServer = () => {
-  server.stop(true)
-}
-
-const restartServer = () => {
-  const preferredPort = server.port
-  stopServer()
-  server = startServer(preferredPort ?? basePort)
-  console.log(`🔁 Server restarted at ${server.url}`)
-}
-
-const handleControlMessage = (message: string) => {
-  if (message === 'restart') {
-    restartServer()
-    return `ok:${server.url}`
-  }
-  if (message === 'stop') {
-    stopServer()
-    process.exit(0)
-  }
-  return 'error:unknown-command'
-}
-
-const tryNotifyExisting = async (controlSocket: string) => {
-  if (!existsSync(controlSocket)) return false
+const sendControlCommand = async (socketPath: string, message: string) => {
   return await new Promise<false | string>((resolve) => {
-    const client = connect(controlSocket, () => {
-      client.write('restart')
+    const client = connect(socketPath, () => {
+      client.write(message)
     })
     const timeout = setTimeout(() => {
       client.destroy()
@@ -148,7 +106,111 @@ const tryNotifyExisting = async (controlSocket: string) => {
   })
 }
 
-const startControlServer = async (controlSocket: string) => {
+type RunningServer = {
+  id: string
+  name: string
+  port?: number
+  url?: string
+  socket: string
+}
+
+const discoverRunningServers = async (): Promise<Map<number, RunningServer>> => {
+  if (!existsSync(CONTROL_DIR)) return new Map()
+  const entries = await readdir(CONTROL_DIR)
+  const servers = new Map<number, RunningServer>()
+
+  await Promise.all(
+    entries
+      .filter((entry) => entry.endsWith('.sock'))
+      .map(async (entry) => {
+        const socketPath = path.join(CONTROL_DIR, entry)
+        const response = await sendControlCommand(socketPath, 'info')
+        if (!response) return
+        try {
+          const info = JSON.parse(response) as { id: string; name: string; port?: number; url?: string }
+          if (typeof info.port === 'number') {
+            servers.set(info.port, { ...info, socket: socketPath })
+          }
+        } catch {
+          // ignore
+        }
+      }),
+  )
+
+  return servers
+}
+
+const startServer = async (
+  startPort: number,
+  currentId: string,
+  runningServers: Map<number, RunningServer>,
+  currentName: string,
+  allowRestartExisting: boolean,
+) => {
+  let port = startPort
+  while (port <= MAX_PORT) {
+    const known = runningServers.get(port)
+    if (known) {
+      if (allowRestartExisting && known.id === currentId) {
+        console.log(`🌐 Existing "${known.name}" server detected on port ${port}.`)
+        const restartAck = await sendControlCommand(known.socket, 'restart')
+        if (restartAck && restartAck.startsWith('ok:')) {
+          const url = restartAck.slice(3)
+          console.log(`🔁 Restarted successfully at ${url}`)
+        } else {
+          console.log(`⚠️ Restart failed: ${restartAck ?? 'unknown error'}`)
+        }
+        process.exit(0)
+      }
+      console.log(`🌐 Existing "${known.name}" server detected on port ${port}.`)
+    }
+
+    try {
+      return serve({ ...serverConfig, port })
+    } catch (error) {
+      if (isAddressInUse(error)) {
+        if (!known) {
+          console.log(`🌐 Existing server detected on port ${port}.`)
+        }
+        port += 1
+        continue
+      }
+      throw error
+    }
+  }
+  throw new Error(`No available port found starting from ${startPort}`)
+}
+
+let server: ReturnType<typeof serve>
+
+const stopServer = () => {
+  server.stop(true)
+}
+
+const restartServer = async (currentId: string, currentName: string) => {
+  const preferredPort = server.port ?? basePort
+  stopServer()
+  const running = await discoverRunningServers()
+  server = await startServer(preferredPort, currentId, running, currentName, false)
+  console.log(`🔁 Server restarted at ${server.url}`)
+}
+
+const handleControlMessage = (message: string, currentId: string, currentName: string) => {
+  if (message === 'restart') {
+    void restartServer(currentId, currentName)
+    return `ok:${server.url}`
+  }
+  if (message === 'stop') {
+    stopServer()
+    process.exit(0)
+  }
+  if (message === 'info') {
+    return JSON.stringify({ id: currentId, name: currentName, port: server.port, url: server.url })
+  }
+  return 'error:unknown-command'
+}
+
+const startControlServer = async (controlSocket: string, currentId: string, currentName: string) => {
   await mkdir(CONTROL_DIR, { recursive: true })
   if (existsSync(controlSocket)) {
     await rm(controlSocket, { force: true })
@@ -156,7 +218,7 @@ const startControlServer = async (controlSocket: string) => {
   const controlServer: Server = createServer((socket) => {
     socket.on('data', (data) => {
       try {
-        const response = handleControlMessage(data.toString().trim())
+        const response = handleControlMessage(data.toString().trim(), currentId, currentName)
         if (response) {
           socket.write(response)
         }
@@ -179,7 +241,7 @@ const startControlServer = async (controlSocket: string) => {
   process.on('SIGTERM', () => void cleanup())
 }
 
-const setupKeyControls = () => {
+const setupKeyControls = (currentId: string, currentName: string) => {
   let input: tty.ReadStream
   if (process.stdin.isTTY) {
     input = process.stdin as tty.ReadStream
@@ -205,7 +267,7 @@ const setupKeyControls = () => {
     }
 
     if (key === 'r') {
-      restartServer()
+      void restartServer(currentId, currentName)
       return
     }
 
@@ -216,21 +278,13 @@ const setupKeyControls = () => {
   })
 }
 
-const serverId = await resolveServerId()
+const { id: serverId, name: serverName } = await resolveServerInfo()
 const controlSocket = path.join(CONTROL_DIR, `${serverId}.sock`)
-const restartAck = await tryNotifyExisting(controlSocket)
-if (restartAck) {
-  if (restartAck.startsWith('ok:')) {
-    const url = restartAck.slice(3)
-    console.log(`🔁 Existing server detected. Restarted successfully at ${url}`)
-  } else {
-    console.log(`⚠️ Existing server detected. Restart failed: ${restartAck}`)
-  }
-  process.exit(0)
-}
+const runningServers = await discoverRunningServers()
+server = await startServer(basePort, serverId, runningServers, serverName, true)
 
-await startControlServer(controlSocket)
-setupKeyControls()
+await startControlServer(controlSocket, serverId, serverName)
+setupKeyControls(serverId, serverName)
 
 console.log(`🚀 Server running at ${server.url}`)
 console.log('Controls: press r to restart, q to quit')
