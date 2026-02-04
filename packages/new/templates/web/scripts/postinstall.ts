@@ -286,8 +286,8 @@ export const serveWithControl = async (config: Parameters<typeof serve>[0] & { p
   process.on('SIGTERM', () => void cleanup())
 
   setupKeyControls(() => void restartServer(), stopServer)
-  console.log('Control socket: ' + path.relative(process.cwd(), controlSocket))
-  console.log('Controls: press r to restart, q to quit, o to open browser')
+  console.log('\ud83d\udd0c Control socket: ' + path.relative(process.cwd(), controlSocket))
+  console.log('\u2328 Controls: press r to restart, q to quit, o to open browser')
 
   return server
 }
