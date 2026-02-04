@@ -1,4 +1,4 @@
-import { serve } from 'bun'
+import { serve, spawn } from 'bun'
 import { connect, createServer, type Server } from 'node:net'
 import { existsSync, openSync } from 'node:fs'
 import { createHash } from 'node:crypto'
@@ -103,6 +103,12 @@ const setupKeyControls = (onRestart: () => void, onStop: () => void) => {
 
     if (key === 'r') {
       onRestart()
+      return
+    }
+
+    if (key === 'o') {
+      const command = process.platform === 'darwin' ? ['open', server.url] : ['xdg-open', server.url]
+      spawn(command, { stdout: 'ignore', stderr: 'ignore' })
       return
     }
 
@@ -273,7 +279,7 @@ export const serveWithControl = async (config: Parameters<typeof serve>[0] & { p
   process.on('SIGTERM', () => void cleanup())
 
   setupKeyControls(() => void restartServer(), stopServer)
-  console.log('Controls: press r to restart, q to quit')
+  console.log('Controls: press r to restart, q to quit, o to open browser')
 
   return server
 }

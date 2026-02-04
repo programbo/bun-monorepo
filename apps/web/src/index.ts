@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto'
 import { connect, createServer, type Server } from 'node:net'
 import path from 'node:path'
 import tty from 'node:tty'
-import { serve, type BunRequest } from 'bun'
+import { serve, type BunRequest, spawn } from 'bun'
 import index from './index.html'
 
 const DEFAULT_PORT = 3000
@@ -241,7 +241,7 @@ const startControlServer = async (controlSocket: string, currentId: string, curr
   process.on('SIGTERM', () => void cleanup())
 }
 
-const setupKeyControls = (currentId: string, currentName: string) => {
+const setupKeyControls = (currentId: string, currentName: string, controlSocket: string) => {
   let input: tty.ReadStream
   if (process.stdin.isTTY) {
     input = process.stdin as tty.ReadStream
@@ -250,6 +250,7 @@ const setupKeyControls = (currentId: string, currentName: string) => {
       const fd = openSync('/dev/tty', 'r')
       input = new tty.ReadStream(fd)
     } catch {
+      console.log(`Controls unavailable (no TTY). Use: printf restart | nc -U ${controlSocket}`)
       return
     }
   }
@@ -271,6 +272,12 @@ const setupKeyControls = (currentId: string, currentName: string) => {
       return
     }
 
+    if (key === 'o') {
+      const command = process.platform === 'darwin' ? ['open', server.url] : ['xdg-open', server.url]
+      spawn(command, { stdout: 'ignore', stderr: 'ignore' })
+      return
+    }
+
     if (key === '\u0003') {
       stopServer()
       process.exit(0)
@@ -284,7 +291,13 @@ const runningServers = await discoverRunningServers()
 server = await startServer(basePort, serverId, runningServers, serverName, true)
 
 await startControlServer(controlSocket, serverId, serverName)
-setupKeyControls(serverId, serverName)
+setupKeyControls(serverId, serverName, controlSocket)
 
 console.log(`🚀 Server running at ${server.url}`)
-console.log('Controls: press r to restart, q to quit')
+console.log('Controls: press r to restart, q to quit, o to open browser')
+console.log(`🔌 Control socket: ${path.relative(process.cwd(), controlSocket)}`)
+
+if (process.env.OPEN_BROWSER === '1') {
+  const command = process.platform === 'darwin' ? ['open', server.url] : ['xdg-open', server.url]
+  spawn(command, { stdout: 'ignore', stderr: 'ignore' })
+}
