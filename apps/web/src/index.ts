@@ -102,23 +102,34 @@ const restartServer = () => {
 const handleControlMessage = (message: string) => {
   if (message === 'restart') {
     restartServer()
-    return
+    return 'ok'
   }
   if (message === 'stop') {
     stopServer()
     process.exit(0)
   }
+  return 'error:unknown-command'
 }
 
 const tryNotifyExisting = async () => {
   if (!existsSync(CONTROL_SOCKET)) return false
-  return await new Promise<boolean>((resolve) => {
+  return await new Promise<false | string>((resolve) => {
     const client = connect(CONTROL_SOCKET, () => {
       client.write('restart')
-      client.end()
-      resolve(true)
     })
-    client.on('error', () => resolve(false))
+    const timeout = setTimeout(() => {
+      client.destroy()
+      resolve(false)
+    }, 1000)
+    client.on('data', (data) => {
+      clearTimeout(timeout)
+      resolve(data.toString().trim())
+      client.end()
+    })
+    client.on('error', () => {
+      clearTimeout(timeout)
+      resolve(false)
+    })
   })
 }
 
@@ -129,7 +140,15 @@ const startControlServer = async () => {
   }
   const controlServer: Server = createServer((socket) => {
     socket.on('data', (data) => {
-      handleControlMessage(data.toString().trim())
+      try {
+        const response = handleControlMessage(data.toString().trim())
+        if (response) {
+          socket.write(response)
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        socket.write(`error:${message}`)
+      }
     })
   })
   controlServer.listen(CONTROL_SOCKET)
@@ -182,8 +201,13 @@ const setupKeyControls = () => {
   })
 }
 
-if (await tryNotifyExisting()) {
-  console.log('🔁 Existing server detected. Sent restart signal.')
+const restartAck = await tryNotifyExisting()
+if (restartAck) {
+  if (restartAck === 'ok') {
+    console.log('🔁 Existing server detected. Restarted successfully.')
+  } else {
+    console.log(`⚠️ Existing server detected. Restart failed: ${restartAck}`)
+  }
   process.exit(0)
 }
 
