@@ -216,3 +216,4 @@ await startControlServer()
 setupKeyControls()
 
 console.log(`🚀 Server running at ${server.url}`)
+console.log('Controls: press r to restart, q to quit')

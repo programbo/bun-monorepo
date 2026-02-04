@@ -198,6 +198,7 @@ export const serveWithControl = async (config: Parameters<typeof serve>[0] & { p
   process.on('SIGTERM', () => void cleanup())
 
   setupKeyControls(restartServer, stopServer)
+  console.log('Controls: press r to restart, q to quit')
 
   return server
 }

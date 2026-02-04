@@ -1,9 +1,9 @@
-import { serve } from 'bun'
-import { connect, createServer, type Server } from 'node:net'
-import { existsSync, openSync } from 'node:fs'
 import { mkdir, rm } from 'node:fs/promises'
+import { existsSync, openSync } from 'node:fs'
+import { connect, createServer, type Server } from 'node:net'
 import path from 'node:path'
 import tty from 'node:tty'
+import { serve } from 'bun'
 
 const DEFAULT_PORT = 3000
 const MAX_PORT = 65_535
@@ -47,7 +47,7 @@ const startServer = (config: Parameters<typeof serve>[0], startPort: number) => 
   let port = startPort
   while (port <= MAX_PORT) {
     try {
-      return serve({ ...config, port })
+      return serve({ ...config, port } as Bun.Serve.Options<undefined>)
     } catch (error) {
       if (isAddressInUse(error)) {
         port += 1
@@ -95,7 +95,10 @@ const setupKeyControls = (onRestart: () => void, onStop: () => void) => {
   })
 }
 
-export const serveWithControl = async (config: Parameters<typeof serve>[0] & { port?: number }, options?: { controlSocket?: string }) => {
+export const serveWithControl = async (
+  config: Parameters<typeof serve>[0] & { port?: number },
+  options?: { controlSocket?: string },
+) => {
   const basePort = resolveBasePort(config.port)
   const { controlDir, controlSocket } = createControlPaths(options?.controlSocket)
 
@@ -185,6 +188,7 @@ export const serveWithControl = async (config: Parameters<typeof serve>[0] & { p
   process.on('SIGTERM', () => void cleanup())
 
   setupKeyControls(restartServer, stopServer)
+  console.log('Controls: press r to restart, q to quit')
 
   return server
 }
