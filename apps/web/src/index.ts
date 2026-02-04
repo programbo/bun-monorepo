@@ -151,18 +151,18 @@ const startServer = async (
   while (port <= MAX_PORT) {
     const known = runningServers.get(port)
     if (known) {
+      const label = known.id === currentId ? '🟢' : '🔵'
+      console.log(`${label} Existing "${known.name}" server detected on port ${port}.`)
       if (allowRestartExisting && known.id === currentId) {
-        console.log(`🌐 Existing "${known.name}" server detected on port ${port}.`)
         const restartAck = await sendControlCommand(known.socket, 'restart')
         if (restartAck && restartAck.startsWith('ok:')) {
           const url = restartAck.slice(3)
-          console.log(`🔁 Restarted successfully at ${url}`)
+          console.log(`♻️ Restarted successfully at ${url}`)
         } else {
           console.log(`⚠️ Restart failed: ${restartAck ?? 'unknown error'}`)
         }
         process.exit(0)
       }
-      console.log(`🌐 Existing "${known.name}" server detected on port ${port}.`)
     }
 
     try {
@@ -170,7 +170,7 @@ const startServer = async (
     } catch (error) {
       if (isAddressInUse(error)) {
         if (!known) {
-          console.log(`🌐 Existing server detected on port ${port}.`)
+          console.log(`⚫ Existing server detected on port ${port}.`)
         }
         port += 1
         continue
