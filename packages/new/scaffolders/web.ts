@@ -8,6 +8,7 @@ import {
   runWorkspaceInstall,
   updateWebAppContent,
 } from './utils'
+import path from 'node:path'
 
 export const metadata = {
   defaultRoot: 'apps',
@@ -23,6 +24,7 @@ export const scaffoldWeb = async (targetDir: string, options: { install: boolean
   }
   await updateWebAppContent(targetDir)
   await runQaInit(targetDir, 'web', true)
+  await run('bun', ['run', 'packages/new/scripts/web-postinstall.ts', '--dir', path.relative(ROOT_DIR, targetDir)], ROOT_DIR)
   if (options.install) {
     await runWorkspaceInstall()
   }
