@@ -71,7 +71,7 @@ export const updateWebAppContent = async (targetDir: string) => {
 
 export const runQaInit = async (targetDir: string, kind: 'web' | 'cli' | 'lib', tailwind: boolean) => {
   const relative = path.relative(ROOT_DIR, targetDir)
-  const args = ['run', 'qa:init', '--dir', relative, '--kind', kind]
+  const args = ['run', '--cwd', path.join(ROOT_DIR, 'packages', 'qa'), 'qa:init', '--dir', relative, '--kind', kind]
   if (tailwind) {
     args.push('--tailwind')
   }
@@ -112,7 +112,7 @@ const resolveProjectName = async () => {
   }
   const pkg = await readJson<{ name?: string }>(pkgPath)
   const raw = pkg.name ?? 'project'
-  const withoutScope = raw.startsWith('@') ? raw.split('/').pop() ?? raw : raw
+  const withoutScope = raw.startsWith('@') ? (raw.split('/').pop() ?? raw) : raw
   return withoutScope
 }
 

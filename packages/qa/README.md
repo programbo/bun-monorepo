@@ -1,14 +1,14 @@
-# @repo/qa
+# @bun-monorepo-template/qa
 
 Shared QA config for the monorepo (Prettier, Oxlint, TypeScript).
 
 ## TL;DR
 
 ```bash
-bun run qa:init --dir apps/web --kind web --tailwind
-bun run qa:init --dir packages/cli --kind cli
-bun run qa:init --dir packages/lib --kind lib
- bun run qa:init apps/web --kind web --tailwind
+bun run --cwd packages/qa qa:init --dir apps/web --kind web --tailwind
+bun run --cwd packages/qa qa:init --dir packages/cli --kind cli
+bun run --cwd packages/qa qa:init --dir packages/lib --kind lib
+bun run --cwd packages/qa qa:init apps/web --kind web --tailwind
 ```
 
 ## What It Does
@@ -31,16 +31,16 @@ bun run qa:init --dir packages/lib --kind lib
 
 Exported presets:
 
-- `@repo/qa/tsconfig` (base)
-- `@repo/qa/tsconfig/node`
-- `@repo/qa/tsconfig/web`
-- `@repo/qa/tsconfig/react-lib`
+- `@bun-monorepo-template/qa/tsconfig` (base)
+- `@bun-monorepo-template/qa/tsconfig/node`
+- `@bun-monorepo-template/qa/tsconfig/web`
+- `@bun-monorepo-template/qa/tsconfig/react-lib`
 
 `qa:init` uses:
 
-- `web` → `@repo/qa/tsconfig/web`
-- `cli`/`lib` → `@repo/qa/tsconfig/node`
-- React library packages → `@repo/qa/tsconfig/react-lib`
+- `web` → `@bun-monorepo-template/qa/tsconfig/web`
+- `cli`/`lib` → `@bun-monorepo-template/qa/tsconfig/node`
+- React library packages → `@bun-monorepo-template/qa/tsconfig/react-lib`
 
 ## Heuristics (when `--kind auto`)
 

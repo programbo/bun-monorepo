@@ -25,5 +25,5 @@ bun run build
 After creation, run:
 
 ```bash
-bun run qa:init --dir . --kind lib --tailwind
+bun run --cwd packages/qa qa:init --dir . --kind lib --tailwind
 ```

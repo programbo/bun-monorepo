@@ -1,5 +1,5 @@
 {
-  "name": "@repo/qa",
+  "name": "@bun-monorepo-template/qa",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -20,13 +20,11 @@
   ],
   "scripts": {
     "build": "bunup",
-    "lint": "bun run --cwd ../../ lint:all",
-    "format": "bun run --cwd ../../ format:all",
-    "typecheck": "bun run --cwd ../../ typecheck:all",
-    "qa": "bun run --cwd ../../ qa",
-    "lint:pkg": "oxlint --config oxlint/oxlint.json --fix .",
-    "format:pkg": "prettier --config prettier/prettier.config.cjs --write .",
-    "typecheck:pkg": "tsc -p tsconfig.json --noEmit",
+    "lint": "oxlint --config oxlint/oxlint.json --fix .",
+    "format": "prettier --config prettier/prettier.config.cjs --write .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "qa": "bun run lint && bun run typecheck && bun run format",
+    "qa:init": "bun run scripts/qa-init.ts",
     "test": "bun test"
   },
   "devDependencies": {

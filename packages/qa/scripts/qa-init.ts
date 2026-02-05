@@ -5,14 +5,14 @@ import path from 'node:path'
 
 const USAGE = `
 Usage:
-  bun run qa:init --dir <path> [--kind web|cli|lib|auto] [--tailwind] [--force]
-  bun run qa:init <path> [--kind web|cli|lib|auto] [--tailwind] [--force]
+  bun run --cwd packages/qa qa:init --dir <path> [--kind web|cli|lib|auto] [--tailwind] [--force]
+  bun run --cwd packages/qa qa:init <path> [--kind web|cli|lib|auto] [--tailwind] [--force]
 
 Examples:
-  bun run qa:init --dir apps/web --kind auto
-  bun run qa:init apps/web --kind auto
-  bun run qa:init --dir packages/cli --kind cli
-  bun run qa:init --dir packages/lib --kind lib
+  bun run --cwd packages/qa qa:init --dir apps/web --kind auto
+  bun run --cwd packages/qa qa:init apps/web --kind auto
+  bun run --cwd packages/qa qa:init --dir packages/cli --kind cli
+  bun run --cwd packages/qa qa:init --dir packages/lib --kind lib
 `
 
 type Kind = 'web' | 'cli' | 'lib' | 'auto'
@@ -247,7 +247,7 @@ const ensureOxlintConfig = async (dir: string, force: boolean) => {
   if (!existsSync(configPath) || force) {
     const contents = `{
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "extends": ["@repo/qa/oxlint"]
+  "extends": ["@bun-monorepo-template/qa/oxlint"]
 }\n`
     await writeFile(configPath, contents, 'utf8')
   } else {
@@ -257,13 +257,13 @@ const ensureOxlintConfig = async (dir: string, force: boolean) => {
 
 const resolveTsconfigPreset = (kind: Exclude<Kind, 'auto'>, pkg: Record<string, unknown>) => {
   if (kind === 'web') {
-    return '@repo/qa/tsconfig/web'
+    return '@bun-monorepo-template/qa/tsconfig/web'
   }
   const isReact = detectReact(pkg)
   if (isReact) {
-    return '@repo/qa/tsconfig/react-lib'
+    return '@bun-monorepo-template/qa/tsconfig/react-lib'
   }
-  return '@repo/qa/tsconfig/node'
+  return '@bun-monorepo-template/qa/tsconfig/node'
 }
 
 interface TsconfigOptions {
@@ -339,7 +339,7 @@ const applyQaScripts = (scripts: Record<string, string>, kind: Exclude<Kind, 'au
 }
 
 const applyQaDevDependencies = (devDependencies: Record<string, string>) => {
-  devDependencies['@repo/qa'] = 'workspace:*'
+  devDependencies['@bun-monorepo-template/qa'] = 'workspace:*'
 }
 
 interface PackageJsonUpdate {
@@ -356,9 +356,9 @@ const writePackageJson = async ({ dir, pkg, scripts, devDependencies }: PackageJ
 }
 
 const resolvePrettierTarget = (tailwind: boolean) => {
-  let target = '@repo/qa/prettier'
+  let target = '@bun-monorepo-template/qa/prettier'
   if (tailwind) {
-    target = '@repo/qa/prettier-tailwind'
+    target = '@bun-monorepo-template/qa/prettier-tailwind'
   }
   return target
 }
@@ -367,8 +367,8 @@ const updateOxlintConfig = async (configPath: string) => {
   const config = await readJson<Record<string, unknown>>(configPath)
   const extendsField = coerceExtendsField(config.extends)
 
-  if (!extendsField.includes('@repo/qa/oxlint')) {
-    extendsField.push('@repo/qa/oxlint')
+  if (!extendsField.includes('@bun-monorepo-template/qa/oxlint')) {
+    extendsField.push('@bun-monorepo-template/qa/oxlint')
   }
 
   config.$schema = './node_modules/oxlint/configuration_schema.json'

@@ -17,5 +17,5 @@ bun run build
 ## QA
 
 ```bash
-bun run qa:init --dir . --kind cli
+bun run --cwd packages/qa qa:init --dir . --kind cli
 ```
