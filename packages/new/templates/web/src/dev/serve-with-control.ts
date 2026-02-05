@@ -214,9 +214,7 @@ const logHealthCheck = async (
 ) => {
   const starting = labels.starting
   const isTTY = Boolean(process.stdout.isTTY)
-  if (isTTY) {
-    process.stdout.write(starting)
-  } else {
+  if (!isTTY) {
     console.log(starting)
   }
 
@@ -224,7 +222,7 @@ const logHealthCheck = async (
   if (result.ok) {
     const message = labels.started
     if (isTTY) {
-      process.stdout.write(`\r\x1b[2K${message}\n`)
+      process.stdout.write(`${message}\n`)
     } else {
       console.log(message)
     }
@@ -243,7 +241,7 @@ const logHealthCheck = async (
     ? `${labels.errorPrefix} (${suffix})`
     : `⚠️ Health check failed for "${serverName}" at ${url} (${suffix})`
   if (isTTY) {
-    process.stdout.write(`\r\x1b[2K${message}\n`)
+    process.stdout.write(`${message}\n`)
     return
   }
   console.log(message)
