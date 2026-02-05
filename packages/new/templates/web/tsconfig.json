@@ -1,5 +1,5 @@
 {
-  "extends": "@repo/qa/tsconfig/web",
+  "extends": "@bun-monorepo-template/qa/tsconfig/web",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

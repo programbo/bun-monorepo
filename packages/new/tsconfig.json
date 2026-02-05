@@ -19,6 +19,6 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  "extends": "@repo/qa/tsconfig/node",
+  "extends": "@bun-monorepo-template/qa/tsconfig/node",
   "exclude": ["templates", "bunup.config.ts"]
 }

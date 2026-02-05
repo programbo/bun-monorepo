@@ -1,5 +1,6 @@
 import { serveWithControl } from './dev/serve-with-control'
-import index from './index.html'
+
+const index = Bun.file(new URL('./index.html', import.meta.url))
 
 const isProduction = process.env.NODE_ENV === 'production'
 
@@ -37,10 +38,16 @@ const applySecurityHeaders = (response: Response) => {
 
 const json = (data: unknown, init?: ResponseInit) => applySecurityHeaders(Response.json(data, init))
 
+const html = (body: BodyInit) => {
+  const headers = new Headers()
+  headers.set('Content-Type', 'text/html; charset=utf-8')
+  return applySecurityHeaders(new Response(body, { headers }))
+}
+
 await serveWithControl({
   routes: {
     // Serve index.html for all unmatched routes.
-    '/*': () => applySecurityHeaders(new Response(index)),
+    '/*': () => html(index),
 
     '/api/hello': {
       async GET(_req) {

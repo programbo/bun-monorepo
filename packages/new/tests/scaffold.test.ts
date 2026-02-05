@@ -42,9 +42,9 @@ const ensureExtends = (value: unknown, expected: string) => {
   throw new Error(`Expected extends to include ${expected}`)
 }
 
-describe('new scaffolds', () => {
+describe('@bun-monorepo-template/new scaffolds', () => {
   const runId = randomUUID()
-  const tmpRoot = path.join(ROOT_DIR, '.tmp', `new-scaffolds-${runId}`)
+  const tmpRoot = path.join(ROOT_DIR, '.tmp', `@bun-monorepo-template/new-scaffolds-${runId}`)
   const bunTmpDir = path.join(tmpRoot, 'bun-tmp')
 
   const webDir = path.join(tmpRoot, 'apps', 'web-fixture')
@@ -61,10 +61,10 @@ describe('new scaffolds', () => {
       TMP: bunTmpDir,
       BUN_NEW_WEB_TEMPLATE: '1',
     }
-    await run(['run', 'new', 'web', path.relative(ROOT_DIR, webDir), '--no-install'], ROOT_DIR, env)
-    await run(['run', 'new', 'cli', path.relative(ROOT_DIR, cliDir), '--no-install'], ROOT_DIR, env)
-    await run(['run', 'new', 'lib', path.relative(ROOT_DIR, libDir), '--no-install'], ROOT_DIR, env)
-    await run(['run', 'new', 'ui', path.relative(ROOT_DIR, uiDir), '--no-install'], ROOT_DIR, env)
+    await run(['run', '@bun-monorepo-template/new', 'web', path.relative(ROOT_DIR, webDir), '--no-install'], ROOT_DIR, env)
+    await run(['run', '@bun-monorepo-template/new', 'cli', path.relative(ROOT_DIR, cliDir), '--no-install'], ROOT_DIR, env)
+    await run(['run', '@bun-monorepo-template/new', 'lib', path.relative(ROOT_DIR, libDir), '--no-install'], ROOT_DIR, env)
+    await run(['run', '@bun-monorepo-template/new', 'ui', path.relative(ROOT_DIR, uiDir), '--no-install'], ROOT_DIR, env)
   })
 
   afterAll(async () => {
@@ -92,23 +92,23 @@ describe('new scaffolds', () => {
     expect(scripts.lint).toBeDefined()
     expect(scripts.format).toBeDefined()
     expect(scripts.typecheck).toBeDefined()
-    expect(devDependencies['@repo/qa']).toBeDefined()
+    expect(devDependencies['@bun-monorepo-template/qa']).toBeDefined()
 
     const prettierConfig = await readFile(path.join(webDir, 'prettier.config.cjs'), 'utf8')
-    expect(prettierConfig).toContain('@repo/qa/prettier-tailwind')
+    expect(prettierConfig).toContain('@bun-monorepo-template/qa/prettier-tailwind')
 
     const oxlint = await readJson(path.join(webDir, 'oxlint.json'))
-    ensureExtends(oxlint.extends, '@repo/qa/oxlint')
+    ensureExtends(oxlint.extends, '@bun-monorepo-template/qa/oxlint')
 
     const tsconfig = await readJson(path.join(webDir, 'tsconfig.json'))
-    expect(tsconfig.extends).toBe('@repo/qa/tsconfig/web')
+    expect(tsconfig.extends).toBe('@bun-monorepo-template/qa/tsconfig/web')
   })
 
   it('scaffolds cli/lib/ui packages with QA config', async () => {
     const packages = [
-      { dir: cliDir, kind: 'cli', tsconfig: '@repo/qa/tsconfig/node', tailwind: false },
-      { dir: libDir, kind: 'lib', tsconfig: '@repo/qa/tsconfig/node', tailwind: false },
-      { dir: uiDir, kind: 'ui', tsconfig: '@repo/qa/tsconfig/react-lib', tailwind: true },
+      { dir: cliDir, kind: 'cli', tsconfig: '@bun-monorepo-template/qa/tsconfig/node', tailwind: false },
+      { dir: libDir, kind: 'lib', tsconfig: '@bun-monorepo-template/qa/tsconfig/node', tailwind: false },
+      { dir: uiDir, kind: 'ui', tsconfig: '@bun-monorepo-template/qa/tsconfig/react-lib', tailwind: true },
     ]
 
     for (const pkgInfo of packages) {
@@ -128,14 +128,14 @@ describe('new scaffolds', () => {
       expect(scripts.format).toBeDefined()
       expect(scripts.typecheck).toBeDefined()
       expect(scripts.build).toBeDefined()
-      expect(devDependencies['@repo/qa']).toBeDefined()
+      expect(devDependencies['@bun-monorepo-template/qa']).toBeDefined()
 
       const prettierConfig = await readFile(path.join(dir, 'prettier.config.cjs'), 'utf8')
-      const expectedPrettier = tailwind ? '@repo/qa/prettier-tailwind' : '@repo/qa/prettier'
+      const expectedPrettier = tailwind ? '@bun-monorepo-template/qa/prettier-tailwind' : '@bun-monorepo-template/qa/prettier'
       expect(prettierConfig).toContain(expectedPrettier)
 
       const oxlint = await readJson(path.join(dir, 'oxlint.json'))
-      ensureExtends(oxlint.extends, '@repo/qa/oxlint')
+      ensureExtends(oxlint.extends, '@bun-monorepo-template/qa/oxlint')
 
       const tsconfig = await readJson(path.join(dir, 'tsconfig.json'))
       expect(tsconfig.extends).toBe(tsconfigPreset)

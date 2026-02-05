@@ -1,4 +1,4 @@
 {
-  "extends": "@repo/qa/tsconfig/node",
+  "extends": "@bun-monorepo-template/qa/tsconfig/node",
   "include": ["src/**/*"]
 }

@@ -22,7 +22,7 @@
     "tailwindcss": "^4.1.11"
   },
   "devDependencies": {
-    "@repo/qa": "workspace:*",
+    "@bun-monorepo-template/qa": "workspace:*",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@types/bun": "latest"

@@ -1,14 +1,14 @@
-# new
+# @bun-monorepo-template/new
 
 Scaffold apps and packages with consistent defaults.
 
 ## TL;DR
 
 ```bash
-bun run new web my-app
-bun run new cli my-cli
-bun run new lib my-lib
-bun run new ui packages/neon-ui-2026
+bun run @bun-monorepo-template/new web my-app
+bun run @bun-monorepo-template/new cli my-cli
+bun run @bun-monorepo-template/new lib my-lib
+bun run @bun-monorepo-template/new ui packages/neon-ui-2026
 ```
 
 ## What It Does

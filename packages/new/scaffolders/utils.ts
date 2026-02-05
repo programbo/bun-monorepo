@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
@@ -7,6 +7,7 @@ export type DefaultRoot = 'apps' | 'packages'
 
 export const ROOT_DIR = path.resolve(import.meta.dir, '../../..')
 export const BUN_CREATE_DIR = path.join(ROOT_DIR, '.bun-create')
+const WEB_TEMPLATE_DIR = path.join(ROOT_DIR, 'packages', 'new', 'templates', 'web')
 
 export const run = async (command: string, args: string[], cwd: string) => {
   const proc = Bun.spawn([command, ...args], {
@@ -69,9 +70,31 @@ export const updateWebAppContent = async (targetDir: string) => {
   await writeFile(appFile, contents, 'utf8')
 }
 
+const copyTemplateDir = async (sourceDir: string, targetDir: string) => {
+  await mkdir(targetDir, { recursive: true })
+  const entries = await readdir(sourceDir, { withFileTypes: true })
+  for (const entry of entries) {
+    const sourcePath = path.join(sourceDir, entry.name)
+    const targetPath = path.join(targetDir, entry.name)
+    if (entry.isDirectory()) {
+      await copyTemplateDir(sourcePath, targetPath)
+      continue
+    }
+    if (entry.isFile()) {
+      await copyFile(sourcePath, targetPath)
+    }
+  }
+}
+
+export const applyWebTemplateTests = async (targetDir: string) => {
+  const sourceTests = path.join(WEB_TEMPLATE_DIR, 'tests')
+  if (!existsSync(sourceTests)) return
+  const targetTests = path.join(targetDir, 'tests')
+  await copyTemplateDir(sourceTests, targetTests)
+}
+
 export const runQaInit = async (targetDir: string, kind: 'web' | 'cli' | 'lib', tailwind: boolean) => {
-  const relative = path.relative(ROOT_DIR, targetDir)
-  const args = ['run', '--cwd', path.join(ROOT_DIR, 'packages', 'qa'), 'qa:init', '--dir', relative, '--kind', kind]
+  const args = ['run', '--cwd', path.join(ROOT_DIR, 'packages', 'qa'), 'qa:init', '--dir', targetDir, '--kind', kind]
   if (tailwind) {
     args.push('--tailwind')
   }
@@ -91,7 +114,7 @@ export const ensureTargetDir = async (targetDir: string) => {
 
 export const ensureTemplates = () => {
   if (!existsSync(BUN_CREATE_DIR)) {
-    throw new Error('Missing .bun-create directory at repo root. Run bun install or bun run -w new postinstall.')
+    throw new Error('Missing .bun-create directory at repo root. Run bun install or bun run -w @bun-monorepo-template/new postinstall.')
   }
 }
 

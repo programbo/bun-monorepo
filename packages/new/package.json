@@ -1,5 +1,5 @@
 {
-  "name": "new",
+  "name": "@bun-monorepo-template/new",
   "module": "index.ts",
   "type": "module",
   "private": true,
@@ -18,7 +18,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "latest",
-    "@repo/qa": "workspace:*",
+    "@bun-monorepo-template/qa": "workspace:*",
     "bunup": "latest"
   },
   "peerDependencies": {

@@ -1,5 +1,5 @@
 {
-  "extends": "@repo/qa/tsconfig/node",
+  "extends": "@bun-monorepo-template/qa/tsconfig/node",
   "compilerOptions": {
     "moduleResolution": "bundler"
   },

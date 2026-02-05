@@ -10,13 +10,15 @@
     "./tsconfig": "./tsconfig/tsconfig.base.json",
     "./tsconfig/node": "./tsconfig/tsconfig.node.json",
     "./tsconfig/web": "./tsconfig/tsconfig.web.json",
-    "./tsconfig/react-lib": "./tsconfig/tsconfig.react-lib.json"
+    "./tsconfig/react-lib": "./tsconfig/tsconfig.react-lib.json",
+    "./testkit": "./src/testkit/index.ts"
   },
   "files": [
     "dist",
     "oxlint",
     "prettier",
-    "tsconfig"
+    "tsconfig",
+    "src/testkit"
   ],
   "scripts": {
     "build": "bunup",

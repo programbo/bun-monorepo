@@ -4,15 +4,15 @@ import path from 'node:path'
 import { describe, expect, it } from 'bun:test'
 
 const ROOT_DIR = path.resolve(import.meta.dir, '../..')
-const TEMPLATES_DIR = path.join(ROOT_DIR, 'new', 'templates')
+const TEMPLATES_DIR = path.join(ROOT_DIR, 'templates')
 const BUN_CREATE = path.join(ROOT_DIR, '..', '.bun-create')
-const POSTINSTALL = path.join(ROOT_DIR, 'new', 'scripts', 'postinstall.ts')
+const POSTINSTALL = path.join(ROOT_DIR, 'scripts', 'postinstall.ts')
 
 const template = (name: string) => path.join(TEMPLATES_DIR, name)
 
 const readJson = async (filePath: string) => JSON.parse(await readFile(filePath, 'utf8')) as Record<string, unknown>
 
-describe('new templates', () => {
+describe('@bun-monorepo-template/new templates', () => {
   it('includes required templates', async () => {
     expect(existsSync(template('web'))).toBeTrue()
     expect(existsSync(template('cli'))).toBeTrue()

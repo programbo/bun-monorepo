@@ -5,9 +5,9 @@ Tailwind CSS UI library template.
 ## Usage
 
 ```ts
-import '@repo/ui/index.css'
-import { Radio, RadioGroup, type RadioProps } from '@repo/ui/radio'
-import { tv, twMerge, twJoin, type VariantProps } from '@repo/ui/utils'
+import '@bun-monorepo-template/ui/index.css'
+import { Radio, RadioGroup, type RadioProps } from '@bun-monorepo-template/ui/radio'
+import { tv, twMerge, twJoin, type VariantProps } from '@bun-monorepo-template/ui/utils'
 ```
 
 ## Dev

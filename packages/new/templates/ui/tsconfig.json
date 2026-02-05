@@ -1,4 +1,4 @@
 {
-  "extends": "@repo/qa/tsconfig/react-lib",
+  "extends": "@bun-monorepo-template/qa/tsconfig/react-lib",
   "include": ["src/**/*"]
 }

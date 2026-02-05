@@ -42,6 +42,27 @@ Exported presets:
 - `cli`/`lib` → `@bun-monorepo-template/qa/tsconfig/node`
 - React library packages → `@bun-monorepo-template/qa/tsconfig/react-lib`
 
+## Testkit
+
+`@bun-monorepo-template/qa/testkit` provides lightweight helpers for Bun tests:
+
+- process helpers (`spawnProcess`, `waitForOutput`)
+- server helpers (`startServer`, `waitForUrl`, `getFreePort`)
+- http helpers (`fetchJson`, `fetchText`)
+- artifact helpers (`writeArtifact`, `writeJsonArtifact`)
+
+Example:
+
+```ts
+import { startServer } from '@bun-monorepo-template/qa/testkit'
+import { fetchJson } from '@bun-monorepo-template/qa/testkit'
+
+const server = await startServer({ command: 'bun', args: ['src/index.ts'], cwd: process.cwd() })
+await server.ready
+const { json } = await fetchJson<{ message: string }>(`${server.url}/api/hello`)
+await server.stop()
+```
+
 ## Heuristics (when `--kind auto`)
 
 - `web` if `react`, `react-dom`, `next`, or `vite` is present

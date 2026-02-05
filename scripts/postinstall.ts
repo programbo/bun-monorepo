@@ -61,6 +61,12 @@ const walk = async (dir: string, replacements: Array<[string, string]>) => {
   )
 }
 
+const resolveScopedName = (value: unknown, fallback: string) => {
+  if (typeof value !== 'string') return fallback
+  if (value.startsWith('@') && value.includes('/')) return value
+  return fallback
+}
+
 const main = async () => {
   const projectName = sanitizeName(path.basename(process.cwd()))
   const rootPkgPath = path.join(ROOT_DIR, 'package.json')
@@ -71,9 +77,9 @@ const main = async () => {
   const qaPkg = existsSync(qaPkgPath) ? await readJson<Record<string, unknown>>(qaPkgPath) : {}
   const newPkg = existsSync(newPkgPath) ? await readJson<Record<string, unknown>>(newPkgPath) : {}
 
-  const oldQaName = typeof qaPkg.name === 'string' ? qaPkg.name : '@repo/qa'
+  const oldQaName = resolveScopedName(qaPkg.name, '@bun-monorepo-template/qa')
   const newQaName = `@${projectName}/qa`
-  const oldNewName = typeof newPkg.name === 'string' ? newPkg.name : '@repo/new'
+  const oldNewName = resolveScopedName(newPkg.name, '@bun-monorepo-template/new')
   const newNewName = `@${projectName}/new`
 
   await updatePackageName(rootPkgPath, projectName)

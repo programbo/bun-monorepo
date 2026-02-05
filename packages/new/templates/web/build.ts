@@ -122,7 +122,7 @@ const assertSafeOutdir = (outdir: string, projectRoot: string) => {
   if (!outdir.trim()) {
     throw new Error('Refusing to use empty outdir.')
   }
-  if (resolved === '/' || resolved === resolvedRoot) {
+  if (resolved === path.parse(resolved).root || resolved === resolvedRoot) {
     throw new Error(`Refusing to delete unsafe outdir: ${resolved}`)
   }
   const rootWithSep = resolvedRoot.endsWith(path.sep) ? resolvedRoot : `${resolvedRoot}${path.sep}`

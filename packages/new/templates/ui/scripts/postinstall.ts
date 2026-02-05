@@ -5,7 +5,7 @@ import path from 'node:path'
 
 const ROOT_DIR = path.resolve(import.meta.dir, '../../..')
 const APPS_DIR = path.join(ROOT_DIR, 'apps')
-const UI_DEP = '@repo/ui'
+const UI_DEP = '@bun-monorepo-template/ui'
 
 const readJson = async <T>(filePath: string): Promise<T> => {
   const contents = await readFile(filePath, 'utf8')
@@ -67,12 +67,12 @@ const findCssImportTarget = async (appDir: string) => {
 
 const addCssImport = async (filePath: string) => {
   const contents = await readFile(filePath, 'utf8')
-  if (contents.includes('@repo/ui/index.css')) return
+  if (contents.includes('@bun-monorepo-template/ui/index.css')) return
 
   const lines = contents.split('\n')
   const importIndex = lines.findIndex((line) => line.startsWith('import '))
   const insertIndex = importIndex >= 0 ? importIndex + 1 : 0
-  lines.splice(insertIndex, 0, "import '@repo/ui/index.css'")
+  lines.splice(insertIndex, 0, "import '@bun-monorepo-template/ui/index.css'")
 
   await writeFile(filePath, `${lines.join('\n')}\n`, 'utf8')
 }
