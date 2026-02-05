@@ -418,6 +418,9 @@ const resolveRunOptions = async (options: Options): Promise<ResolvedRunOptions> 
   return { dir, pkg, resolvedKind, resolvedTailwind }
 }
 
+const REPO_ROOT = path.resolve(import.meta.dir, '../../..')
+const QA_CWD = path.join(REPO_ROOT, 'packages', 'qa')
+
 const resolveDir = (options: Options) => {
   if (!options.dir) {
     console.error('Missing --dir')
@@ -425,7 +428,16 @@ const resolveDir = (options: Options) => {
     process.exit(EXIT_FAILURE)
   }
 
-  return path.resolve(process.cwd(), options.dir)
+  if (path.isAbsolute(options.dir)) {
+    return options.dir
+  }
+
+  const cwd = process.cwd()
+  if (cwd === QA_CWD || cwd.startsWith(`${QA_CWD}${path.sep}`)) {
+    return path.resolve(REPO_ROOT, options.dir)
+  }
+
+  return path.resolve(cwd, options.dir)
 }
 
 const ensureDirExists = async (dir: string) => {
