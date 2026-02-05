@@ -19,6 +19,7 @@ bun run @bun-monorepo-template/new ui packages/neon-ui-2026
 - `ui`: `packages/<name>` from local templates, then runs `qa:init` with Tailwind.
 - All templates run `bun install` at the repo root when they finish scaffolding.
 - Pass `--no-install` to skip the install.
+- If you omit `<name>`, the template name is used (ex: `cli` -> `packages/cli`).
 
 ## Notes
 

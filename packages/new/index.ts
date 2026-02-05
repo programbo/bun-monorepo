@@ -7,7 +7,7 @@ import { metadata as webMeta, scaffoldWeb } from './scaffolders/web'
 
 const USAGE = `
 Usage:
-  bun run new <type> <name> [--no-install]
+  bun run new <type> [name] [--no-install]
 
 Types:
   web   Creates a Bun React + Tailwind app in apps/<name>
@@ -18,8 +18,8 @@ Types:
 
 const main = async () => {
   const args = process.argv.slice(2)
-  const [typeArg, nameArg, ...rest] = args
-  if (!typeArg || !nameArg) {
+  const [typeArg, ...rest] = args
+  if (!typeArg) {
     console.log(USAGE)
     process.exit(1)
   }
@@ -29,6 +29,7 @@ const main = async () => {
   }
 
   const type = typeArg as AppType
+  const nameArg = rest.find((arg) => !arg.startsWith('-')) ?? type
   const metadata: Record<AppType, { defaultRoot: 'apps' | 'packages' }> = {
     web: webMeta,
     cli: cliMeta,
