@@ -1,59 +1,54 @@
-# bun-monorepo
+# Bun Monorepo Template
 
-This repository is a Bun workspaces monorepo. The existing React + Tailwind app lives in `apps/web`.
-Shared QA config lives in `packages/qa`.
+This repo exists to give you a fast, batteries‑included Bun workspace with a production‑ready React + Tailwind web app, plus opinionated scaffolding and QA tooling so every new package starts clean.
 
-## Repo Defaults
+Use it directly with `bun create`:
 
-- Root oxlint configuration lives in `oxlint.json` and uses the local schema path for editor tooling.
-- `packages/new` provides scaffolding for apps and packages with QA defaults applied.
+```bash
+bun create programbo/bun-monorepo <PROJECT_NAME>
+```
 
-## Setup
-
-Install all workspace dependencies from the repo root:
+**Quick Start**
 
 ```bash
 bun install
+bun --cwd apps/web dev
 ```
 
-## Development
+Then open `http://localhost:3000/`.
 
-Run all workspace dev servers (apps + packages):
+**Highlights**
+
+- **Default `web` app**: React + Tailwind, Bun dev server, hot reload, and a health‑checked startup with smart port handling.
+- **Seamless dev server takeover**: If a matching app is already running on the default port, the new process gracefully stops it and takes over without manual cleanup.
+- **`packages/new`**: Scaffolds apps and packages with the repo’s QA defaults baked in.  
+  Run: `bun run new`
+- **`packages/qa`**: Shared lint/format/typecheck configs and scripts used by every workspace.  
+  Run: `bun run qa`
+
+**Common Commands**
 
 ```bash
+# Run all workspace dev servers (if present)
 bun run dev
+
+# Build the web app
+bun --cwd apps/web run build
+
+# Run the web app in production mode
+bun --cwd apps/web run start
 ```
 
-To run just the web app from the app directory:
+**Environment Variables**
 
-```bash
-cd apps/web
-bun dev
-```
+Server control for the `web` app (development only):
 
-## Quality Assurance
+- `PORT`: Base port for the dev server (default `3000`).
+- `PORT_OFFSET`: Adds an offset to `PORT` (handy when running multiple instances).
+- `NODE_ENV`: Set to `production` to disable dev features in `apps/web`. Server controls are intended for non‑production use only.
 
-All apps and packages use the shared QA package. Each workspace should include scripts to run:
+**Repo Defaults**
 
-- `oxlint --config oxlint.json --fix .`
-- `prettier --config prettier.config.cjs --write .`
-- `tsc -p tsconfig.json --noEmit`
-
-Integration details and templates live in `packages/qa/README.md`.
-
-## Production
-
-Build and run the web app:
-
-```bash
-bun run --filter web build
-bun run --filter web start
-```
-
-Or from the app directory:
-
-```bash
-cd apps/web
-bun run build
-bun start
-```
+- Root lint config lives in `oxlint.json`.
+- Formatting uses `prettier.config.cjs`.
+- The `new` scaffolder injects QA defaults into generated workspaces.
