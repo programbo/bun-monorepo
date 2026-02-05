@@ -31,8 +31,12 @@ export const ensureEmptyDir = async (dir: string) => {
 
 export const resolveTarget = (name: string, defaultRoot: DefaultRoot) => {
   const isPath = name.includes('/') || name.includes('\\') || name.startsWith('apps/') || name.startsWith('packages/')
-  if (isPath) return path.resolve(ROOT_DIR, name)
-  return path.join(ROOT_DIR, defaultRoot, name)
+  const resolved = isPath ? path.resolve(ROOT_DIR, name) : path.join(ROOT_DIR, defaultRoot, name)
+  const rootWithSep = ROOT_DIR.endsWith(path.sep) ? ROOT_DIR : `${ROOT_DIR}${path.sep}`
+  if (!resolved.startsWith(rootWithSep)) {
+    throw new Error(`Target path must be inside repo root: ${ROOT_DIR}`)
+  }
+  return resolved
 }
 
 export const updateWebAppContent = async (targetDir: string) => {

@@ -116,10 +116,26 @@ const formatFileSize = (bytes: number): string => {
   return `${size.toFixed(2)} ${units[unitIndex]}`
 }
 
+const assertSafeOutdir = (outdir: string, projectRoot: string) => {
+  const resolved = path.resolve(outdir)
+  const resolvedRoot = path.resolve(projectRoot)
+  if (!outdir.trim()) {
+    throw new Error('Refusing to use empty outdir.')
+  }
+  if (resolved === '/' || resolved === resolvedRoot) {
+    throw new Error(`Refusing to delete unsafe outdir: ${resolved}`)
+  }
+  const rootWithSep = resolvedRoot.endsWith(path.sep) ? resolvedRoot : `${resolvedRoot}${path.sep}`
+  if (!resolved.startsWith(rootWithSep)) {
+    throw new Error(`Refusing to delete outdir outside project: ${resolved}`)
+  }
+}
+
 console.log('\n🚀 Starting build process...\n')
 
 const cliConfig = parseArgs()
 const outdir = cliConfig.outdir || path.join(process.cwd(), 'dist')
+assertSafeOutdir(String(outdir), process.cwd())
 
 if (existsSync(outdir)) {
   console.log(`🗑️ Cleaning previous build at ${outdir}`)
