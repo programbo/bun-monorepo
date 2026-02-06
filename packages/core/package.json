@@ -8,13 +8,9 @@
     "./date": "./src/date/index.ts"
   },
   "scripts": {
-    "lint": "bun run --cwd ../../ lint:all",
-    "format": "bun run --cwd ../../ format:all",
-    "typecheck": "bun run --cwd ../../ typecheck:all",
-    "qa": "bun run --cwd ../../ qa",
-    "lint:pkg": "oxlint --config oxlint.json --fix .",
-    "format:pkg": "prettier --config prettier.config.cjs --write .",
-    "typecheck:pkg": "tsc -p tsconfig.json --noEmit",
+    "lint": "oxlint --config oxlint.json --fix .",
+    "format": "prettier --config prettier.config.cjs --write .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "bun test"
   },
   "devDependencies": {

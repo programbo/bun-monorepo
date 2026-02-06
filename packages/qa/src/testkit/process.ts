@@ -2,6 +2,10 @@ import { pollUntil } from './time'
 
 export type OutputMatcher = string | RegExp
 
+const DEFAULT_OUTPUT_TIMEOUT_MS = 5000
+const DEFAULT_QUIET_INTERVAL_MS = 200
+const DEFAULT_QUIET_TIMEOUT_MS = 2000
+
 export interface StreamCollector {
   done: Promise<void>
   text: () => string
@@ -17,10 +21,10 @@ export interface SpawnOptions {
 }
 
 export interface SpawnedProcess {
-  proc: Bun.Process
-  stdout: StreamCollector | null
-  stderr: StreamCollector | null
-  kill: (signal?: number | string) => void
+  proc: Bun.Subprocess
+  stdout: StreamCollector | undefined
+  stderr: StreamCollector | undefined
+  kill: (signal?: number | NodeJS.Signals) => void
   waitForExit: () => Promise<{ exitCode: number; stdout: string; stderr: string }>
 }
 
@@ -31,67 +35,76 @@ const matchesOutput = (output: string, matcher: OutputMatcher) => {
   return matcher.test(output)
 }
 
-const createStreamCollector = (stream: ReadableStream<Uint8Array> | null): StreamCollector | null => {
-  if (!stream) return null
+interface Waiter {
+  matcher: OutputMatcher
+  resolve: (value: string) => void
+  reject: (error: Error) => void
+  timeoutId?: ReturnType<typeof setTimeout>
+}
 
-  const decoder = new TextDecoder()
-  let buffer = ''
-  let resolveDone: (() => void) | undefined
+interface BufferRef {
+  value: string
+}
+
+const createDoneSignal = () => {
+  let resolveDone: (() => void) | undefined = undefined
   const done = new Promise<void>((resolve) => {
     resolveDone = resolve
   })
+  return { done, resolveDone }
+}
 
-  type Waiter = {
-    matcher: OutputMatcher
-    resolve: (value: string) => void
-    reject: (error: Error) => void
-    timeoutId?: ReturnType<typeof setTimeout>
-  }
-
-  const waiters = new Set<Waiter>()
-
-  const checkWaiters = () => {
-    for (const waiter of waiters) {
-      if (matchesOutput(buffer, waiter.matcher)) {
-        if (waiter.timeoutId) clearTimeout(waiter.timeoutId)
-        waiter.resolve(buffer)
-        waiters.delete(waiter)
+const resolveWaiters = (waiters: Set<Waiter>, buffer: string) => {
+  for (const waiter of waiters) {
+    if (matchesOutput(buffer, waiter.matcher)) {
+      if (waiter.timeoutId) {
+        clearTimeout(waiter.timeoutId)
       }
+      waiter.resolve(buffer)
+      waiters.delete(waiter)
     }
   }
+}
 
-  const finishWaiters = () => {
-    for (const waiter of waiters) {
-      if (waiter.timeoutId) clearTimeout(waiter.timeoutId)
-      waiter.reject(new Error('Stream ended before output matched.'))
+const rejectWaiters = (waiters: Set<Waiter>) => {
+  for (const waiter of waiters) {
+    if (waiter.timeoutId) {
+      clearTimeout(waiter.timeoutId)
     }
-    waiters.clear()
+    waiter.reject(new Error('Stream ended before output matched.'))
   }
+  waiters.clear()
+}
 
-  const pump = async () => {
-    const reader = stream.getReader()
-    try {
-      while (true) {
-        const { done: isDone, value } = await reader.read()
-        if (isDone) break
-        buffer += decoder.decode(value, { stream: true })
-        checkWaiters()
-      }
-      buffer += decoder.decode()
-    } finally {
-      resolveDone?.()
-      finishWaiters()
+const startStreamPump = async (options: {
+  stream: ReadableStream<Uint8Array>
+  onChunk: (chunk: Uint8Array) => void
+  onDone: () => void
+}) => {
+  try {
+    for await (const chunk of options.stream) {
+      options.onChunk(chunk)
     }
+  } finally {
+    options.onDone()
   }
+}
 
-  void pump()
+const createWaitFor =
+  (getBuffer: () => string, waiters: Set<Waiter>) =>
+  async (matcher: OutputMatcher, options?: { timeoutMs?: number }) => {
+    const current = getBuffer()
+    if (matchesOutput(current, matcher)) {
+      return current
+    }
 
-  const waitFor = async (matcher: OutputMatcher, options?: { timeoutMs?: number }) => {
-    if (matchesOutput(buffer, matcher)) return buffer
-    const timeoutMs = options?.timeoutMs ?? 5000
+    let timeoutMs = DEFAULT_OUTPUT_TIMEOUT_MS
+    if (options?.timeoutMs !== undefined) {
+      ;({ timeoutMs } = options)
+    }
 
     return await new Promise<string>((resolve, reject) => {
-      const waiter: Waiter = { matcher, resolve, reject }
+      const waiter: Waiter = { matcher, reject, resolve }
       waiter.timeoutId = setTimeout(() => {
         waiters.delete(waiter)
         reject(new Error(`Timed out after ${timeoutMs}ms waiting for output.`))
@@ -100,9 +113,39 @@ const createStreamCollector = (stream: ReadableStream<Uint8Array> | null): Strea
     })
   }
 
+const createStreamHandlers = (decoder: TextDecoder, bufferRef: BufferRef, resolveDone: (() => void) | undefined) => {
+  const waiters = new Set<Waiter>()
+  const waitFor = createWaitFor(() => bufferRef.value, waiters)
+  const onChunk = (chunk: Uint8Array) => {
+    bufferRef.value += decoder.decode(chunk, { stream: true })
+    resolveWaiters(waiters, bufferRef.value)
+  }
+  const onDone = () => {
+    bufferRef.value += decoder.decode()
+    resolveDone?.()
+    rejectWaiters(waiters)
+  }
+
+  return { onChunk, onDone, waitFor }
+}
+
+const createStreamCollector = (
+  stream: ReadableStream<Uint8Array<ArrayBuffer>> | ReadableStream<Uint8Array<ArrayBufferLike>> | null | undefined,
+): StreamCollector | undefined => {
+  if (!stream) {
+    return undefined
+  }
+
+  const decoder = new TextDecoder()
+  const bufferRef: BufferRef = { value: '' }
+  const { done, resolveDone } = createDoneSignal()
+  const { onChunk, onDone, waitFor } = createStreamHandlers(decoder, bufferRef, resolveDone)
+
+  void startStreamPump({ onChunk, onDone, stream: stream as ReadableStream<Uint8Array> })
+
   return {
     done,
-    text: () => buffer,
+    text: () => bufferRef.value,
     waitFor,
   }
 }
@@ -111,9 +154,9 @@ export const spawnProcess = (command: string, args: string[] = [], options: Spaw
   const proc = Bun.spawn([command, ...args], {
     cwd: options.cwd,
     env: options.env,
+    stderr: options.stderr ?? 'pipe',
     stdin: options.stdin ?? 'ignore',
     stdout: options.stdout ?? 'pipe',
-    stderr: options.stderr ?? 'pipe',
   })
 
   const stdout = createStreamCollector(proc.stdout)
@@ -122,10 +165,10 @@ export const spawnProcess = (command: string, args: string[] = [], options: Spaw
   const waitForExit = async () => {
     const exitCode = await proc.exited
     await Promise.all([stdout?.done, stderr?.done])
-    return { exitCode, stdout: stdout?.text() ?? '', stderr: stderr?.text() ?? '' }
+    return { exitCode, stderr: stderr?.text() ?? '', stdout: stdout?.text() ?? '' }
   }
 
-  const kill = (signal?: number | string) => {
+  const kill = (signal?: number | NodeJS.Signals) => {
     if (signal !== undefined) {
       proc.kill(signal)
     } else {
@@ -133,17 +176,25 @@ export const spawnProcess = (command: string, args: string[] = [], options: Spaw
     }
   }
 
-  return { proc, stdout, stderr, kill, waitForExit }
+  return { kill, proc, stderr, stdout, waitForExit }
 }
 
-export const waitForOutput = async (collector: StreamCollector | null, matcher: OutputMatcher, timeoutMs = 5000) => {
+export const waitForOutput = async (
+  collector: StreamCollector | undefined,
+  matcher: OutputMatcher,
+  timeoutMs = DEFAULT_OUTPUT_TIMEOUT_MS,
+) => {
   if (!collector) {
     throw new Error('Output stream is not available (did you set stdout/stderr to "pipe"?)')
   }
   return await collector.waitFor(matcher, { timeoutMs })
 }
 
-export const expectOutput = async (collector: StreamCollector | null, matcher: OutputMatcher, timeoutMs = 5000) => {
+export const expectOutput = async (
+  collector: StreamCollector | undefined,
+  matcher: OutputMatcher,
+  timeoutMs = DEFAULT_OUTPUT_TIMEOUT_MS,
+) => {
   const output = await waitForOutput(collector, matcher, timeoutMs)
   if (!matchesOutput(output, matcher)) {
     throw new Error('Expected output was not found.')
@@ -151,12 +202,16 @@ export const expectOutput = async (collector: StreamCollector | null, matcher: O
   return output
 }
 
-export const waitForExit = async (proc: SpawnedProcess) => {
-  return await proc.waitForExit()
-}
+export const waitForExit = async (proc: SpawnedProcess) => await proc.waitForExit()
 
-export const waitForQuiet = async (collector: StreamCollector | null, quietMs = 200, timeoutMs = 2000) => {
-  if (!collector) return ''
+export const waitForQuiet = async (
+  collector: StreamCollector | undefined,
+  quietMs = DEFAULT_QUIET_INTERVAL_MS,
+  timeoutMs = DEFAULT_QUIET_TIMEOUT_MS,
+) => {
+  if (!collector) {
+    return ''
+  }
   let last = collector.text()
   await pollUntil(
     () => {

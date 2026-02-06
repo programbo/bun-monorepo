@@ -4,20 +4,25 @@ export const fetchText = async (url: string, init?: RequestInit) => {
   return { response, text }
 }
 
-export const fetchJson = async <T>(url: string, init?: RequestInit) => {
+export const fetchJson = async <TResult>(url: string, init?: RequestInit) => {
   const response = await fetch(url, init)
   const text = await response.text()
-  let json: T | null = null
+  let json: TResult | undefined = undefined
   try {
-    json = JSON.parse(text) as T
+    json = JSON.parse(text) as TResult
   } catch {
-    json = null
+    json = undefined
   }
-  return { response, text, json }
+  return { json, response, text }
 }
 
 export const expectStatus = (response: Response, expected: number | number[]) => {
-  const expectedList = Array.isArray(expected) ? expected : [expected]
+  const expectedList: number[] = []
+  if (Array.isArray(expected)) {
+    expectedList.push(...expected)
+  } else {
+    expectedList.push(expected)
+  }
   if (!expectedList.includes(response.status)) {
     throw new Error(`Expected status ${expectedList.join(', ')}, got ${response.status}`)
   }
@@ -27,5 +32,5 @@ export const timedFetch = async (url: string, init?: RequestInit) => {
   const start = performance.now()
   const response = await fetch(url, init)
   const elapsedMs = performance.now() - start
-  return { response, elapsedMs }
+  return { elapsedMs, response }
 }

@@ -25,7 +25,6 @@
     "lint": "oxlint --config oxlint/oxlint.json --fix .",
     "format": "prettier --config prettier/prettier.config.cjs --write .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "qa": "bun run lint && bun run typecheck && bun run format",
     "qa:init": "bun run scripts/qa-init.ts",
     "test": "bun test"
   },
