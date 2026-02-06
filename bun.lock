@@ -40,6 +40,16 @@
         "@types/node": "latest",
       },
     },
+    "packages/lib": {
+      "name": "@bun-monorepo-template/lib",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@bun-monorepo-template/qa": "workspace:*",
+        "@types/bun": "latest",
+        "@types/node": "latest",
+        "bunup": "latest",
+      },
+    },
     "packages/new": {
       "name": "@bun-monorepo-template/new",
       "devDependencies": {
@@ -87,6 +97,8 @@
     "@babel/types": ["@babel/types@7.29.0", "", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.28.5" } }, "sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A=="],
 
     "@bun-monorepo-template/core": ["@bun-monorepo-template/core@workspace:packages/core"],
+
+    "@bun-monorepo-template/lib": ["@bun-monorepo-template/lib@workspace:packages/lib"],
 
     "@bun-monorepo-template/new": ["@bun-monorepo-template/new@workspace:packages/new"],
 

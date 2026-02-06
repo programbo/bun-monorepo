@@ -246,7 +246,7 @@ const ensureOxlintConfig = async (dir: string, force: boolean) => {
   const configPath = path.join(dir, 'oxlint.json')
   if (!existsSync(configPath) || force) {
     const contents = `{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "$schema": "../../node_modules/oxlint/configuration_schema.json",
   "extends": ["@bun-monorepo-template/qa/oxlint"]
 }\n`
     await writeFile(configPath, contents, 'utf8')

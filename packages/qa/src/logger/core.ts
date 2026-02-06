@@ -101,6 +101,17 @@ export const createLogger = (options: LoggerOptions = {}): Logger => {
     stream.write(formatMessage({ isTTY, json: state.json, level, meta: mergedMeta, msg, timestamp: state.timestamp }))
   }
 
+  const applyInit = (next: LoggerInit) => {
+    Object.assign(state, {
+      ...(next.level && { level: next.level }),
+      ...(next.stdout && { stdout: next.stdout }),
+      ...(next.stderr && { stderr: next.stderr }),
+      ...(next.timestamp && { timestamp: next.timestamp }),
+      ...(next.json !== undefined && { json: next.json }),
+      ...(next.isTTY !== undefined && { isTTY: next.isTTY }),
+    })
+  }
+
   const logger: Logger = {
     child: (meta) =>
       createLogger({
@@ -115,28 +126,7 @@ export const createLogger = (options: LoggerOptions = {}): Logger => {
     debug: (msg, meta) => write('debug', msg, meta),
     error: (msg, meta) => write('error', msg, meta),
     info: (msg, meta) => write('info', msg, meta),
-    init: (next: LoggerInit) => {
-      if (next.level) {
-        state.level = next.level
-      }
-      if (next.json !== undefined) {
-        state.json = next.json
-      }
-      if (next.stdout) {
-        state.stdout = next.stdout
-      }
-      if (next.stderr) {
-        state.stderr = next.stderr
-      }
-      if (next.isTTY !== undefined) {
-        state.isTTY = next.isTTY
-      }
-      if (next.timestamp) {
-        state.timestamp = next.timestamp
-      }
-      logger.level = state.level
-      logger.json = state.json
-    },
+    init: applyInit,
     json: state.json,
     level: state.level,
     warn: (msg, meta) => write('warn', msg, meta),
