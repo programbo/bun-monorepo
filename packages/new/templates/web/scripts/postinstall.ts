@@ -5,6 +5,34 @@ import path from 'node:path'
 
 const ROOT_DIR = path.resolve(import.meta.dir, '..')
 
+const readJson = async <TData>(filePath: string): Promise<TData> => {
+  const contents = await readFile(filePath, 'utf8')
+  return JSON.parse(contents) as TData
+}
+
+const writeJson = async (filePath: string, data: unknown) => {
+  const contents = `${JSON.stringify(data, undefined, 2)}\n`
+  await writeFile(filePath, contents, 'utf8')
+}
+
+const findWorkspaceRoot = async (startDir: string) => {
+  let current = startDir
+  while (true) {
+    const pkgPath = path.join(current, 'package.json')
+    if (existsSync(pkgPath)) {
+      try {
+        const pkg = await readJson<{ workspaces?: unknown }>(pkgPath)
+        if (pkg.workspaces) return current
+      } catch {
+        // ignore and keep walking
+      }
+    }
+    const parent = path.dirname(current)
+    if (parent === current) return null
+    current = parent
+  }
+}
+
 const isModuleProject = async () => {
   const pkgPath = path.join(ROOT_DIR, 'package.json')
   if (!existsSync(pkgPath)) return false
@@ -96,10 +124,34 @@ const updateIndex = async () => {
   await writeFile(indexPath, updated, 'utf8')
 }
 
+const ensureCoreDependency = async () => {
+  const workspaceRoot = await findWorkspaceRoot(ROOT_DIR)
+  if (!workspaceRoot) return
+
+  const corePkgPath = path.join(workspaceRoot, 'packages', 'core', 'package.json')
+  if (!existsSync(corePkgPath)) return
+
+  const corePkg = await readJson<{ name?: string }>(corePkgPath)
+  if (!corePkg.name) return
+
+  const packageJsonPath = path.join(ROOT_DIR, 'package.json')
+  if (!existsSync(packageJsonPath)) return
+
+  const pkg = await readJson<{ dependencies?: Record<string, string> }>(packageJsonPath)
+  const dependencies = { ...(pkg.dependencies ?? {}) }
+  if (dependencies[corePkg.name]) return
+
+  dependencies[corePkg.name] = 'workspace:*'
+  pkg.dependencies = dependencies
+
+  await writeJson(packageJsonPath, pkg)
+}
+
 const main = async () => {
   await updateAppContent()
   await removeExtras()
   await updateIndex()
+  await ensureCoreDependency()
 }
 
 main().catch((error) => {

@@ -1,0 +1,5 @@
+{
+  "extends": "@bun-monorepo-template/qa/tsconfig/node",
+  "include": ["src", "tests"],
+  "exclude": ["dist", "node_modules"]
+}

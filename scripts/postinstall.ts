@@ -71,24 +71,32 @@ const main = async () => {
   const projectName = sanitizeName(path.basename(process.cwd()))
   const rootPkgPath = path.join(ROOT_DIR, 'package.json')
   const qaPkgPath = path.join(ROOT_DIR, 'packages', 'qa', 'package.json')
+  const corePkgPath = path.join(ROOT_DIR, 'packages', 'core', 'package.json')
   const newPkgPath = path.join(ROOT_DIR, 'packages', 'new', 'package.json')
 
   const rootPkg = existsSync(rootPkgPath) ? await readJson<Record<string, unknown>>(rootPkgPath) : {}
   const qaPkg = existsSync(qaPkgPath) ? await readJson<Record<string, unknown>>(qaPkgPath) : {}
+  const corePkg = existsSync(corePkgPath) ? await readJson<Record<string, unknown>>(corePkgPath) : {}
   const newPkg = existsSync(newPkgPath) ? await readJson<Record<string, unknown>>(newPkgPath) : {}
 
   const oldQaName = resolveScopedName(qaPkg.name, '@bun-monorepo-template/qa')
   const newQaName = `@${projectName}/qa`
+  const oldCoreName = resolveScopedName(corePkg.name, '@bun-monorepo-template/core')
+  const newCoreName = `@${projectName}/core`
   const oldNewName = resolveScopedName(newPkg.name, '@bun-monorepo-template/new')
   const newNewName = `@${projectName}/new`
 
   await updatePackageName(rootPkgPath, projectName)
   await updatePackageName(qaPkgPath, newQaName)
+  await updatePackageName(corePkgPath, newCoreName)
   await updatePackageName(newPkgPath, newNewName)
 
   const replacements: Array<[string, string]> = [
     [oldQaName, newQaName],
   ]
+  if (oldCoreName !== newCoreName) {
+    replacements.push([oldCoreName, newCoreName])
+  }
   if (oldNewName !== newNewName) {
     replacements.push([oldNewName, newNewName])
   }
