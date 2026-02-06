@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
-import { existsSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import path from 'node:path'
 
 const PACKAGE_DIR = path.resolve(import.meta.dir, '..')
@@ -40,7 +40,7 @@ const ensureCoreDependency = async () => {
   if (!corePkg.name) return
 
   const pkg = await readJson<{ dependencies?: Record<string, string> }>(packageJsonPath)
-  const dependencies = { ...(pkg.dependencies ?? {}) }
+  const dependencies = { ...pkg.dependencies }
   if (dependencies[corePkg.name]) return
 
   dependencies[corePkg.name] = 'workspace:*'

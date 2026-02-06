@@ -1,9 +1,9 @@
-import { afterAll, beforeAll, describe, expect, it } from 'bun:test'
 import path from 'node:path'
 import { fetchJson, fetchText, expectStatus } from '@bun-monorepo-template/qa/testkit'
 import { startServer } from '@bun-monorepo-template/qa/testkit'
 import { writeArtifact, writeJsonArtifact } from '@bun-monorepo-template/qa/testkit'
 import { waitForOutput } from '@bun-monorepo-template/qa/testkit'
+import { afterAll, beforeAll, describe, expect, it } from 'bun:test'
 
 const ROOT_DIR = path.resolve(import.meta.dir, '..')
 

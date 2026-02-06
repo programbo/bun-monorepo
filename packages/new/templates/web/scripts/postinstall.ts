@@ -138,7 +138,7 @@ const ensureCoreDependency = async () => {
   if (!existsSync(packageJsonPath)) return
 
   const pkg = await readJson<{ dependencies?: Record<string, string> }>(packageJsonPath)
-  const dependencies = { ...(pkg.dependencies ?? {}) }
+  const dependencies = { ...pkg.dependencies }
   if (dependencies[corePkg.name]) return
 
   dependencies[corePkg.name] = 'workspace:*'

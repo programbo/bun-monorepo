@@ -61,10 +61,26 @@ describe('@bun-monorepo-template/new scaffolds', () => {
       TMP: bunTmpDir,
       BUN_NEW_WEB_TEMPLATE: '1',
     }
-    await run(['run', '@bun-monorepo-template/new', 'web', path.relative(ROOT_DIR, webDir), '--no-install'], ROOT_DIR, env)
-    await run(['run', '@bun-monorepo-template/new', 'cli', path.relative(ROOT_DIR, cliDir), '--no-install'], ROOT_DIR, env)
-    await run(['run', '@bun-monorepo-template/new', 'lib', path.relative(ROOT_DIR, libDir), '--no-install'], ROOT_DIR, env)
-    await run(['run', '@bun-monorepo-template/new', 'ui', path.relative(ROOT_DIR, uiDir), '--no-install'], ROOT_DIR, env)
+    await run(
+      ['run', '@bun-monorepo-template/new', 'web', path.relative(ROOT_DIR, webDir), '--no-install'],
+      ROOT_DIR,
+      env,
+    )
+    await run(
+      ['run', '@bun-monorepo-template/new', 'cli', path.relative(ROOT_DIR, cliDir), '--no-install'],
+      ROOT_DIR,
+      env,
+    )
+    await run(
+      ['run', '@bun-monorepo-template/new', 'lib', path.relative(ROOT_DIR, libDir), '--no-install'],
+      ROOT_DIR,
+      env,
+    )
+    await run(
+      ['run', '@bun-monorepo-template/new', 'ui', path.relative(ROOT_DIR, uiDir), '--no-install'],
+      ROOT_DIR,
+      env,
+    )
   })
 
   afterAll(async () => {
@@ -131,7 +147,9 @@ describe('@bun-monorepo-template/new scaffolds', () => {
       expect(devDependencies['@bun-monorepo-template/qa']).toBeDefined()
 
       const prettierConfig = await readFile(path.join(dir, 'prettier.config.cjs'), 'utf8')
-      const expectedPrettier = tailwind ? '@bun-monorepo-template/qa/prettier-tailwind' : '@bun-monorepo-template/qa/prettier'
+      const expectedPrettier = tailwind
+        ? '@bun-monorepo-template/qa/prettier-tailwind'
+        : '@bun-monorepo-template/qa/prettier'
       expect(prettierConfig).toContain(expectedPrettier)
 
       const oxlint = await readJson(path.join(dir, 'oxlint.json'))

@@ -77,12 +77,7 @@ const resolveProjectRoot = async () => {
   }
 }
 
-const createControlPaths = async (
-  root: string,
-  shortName: string,
-  port: number,
-  controlSocket?: string,
-) => {
+const createControlPaths = async (root: string, shortName: string, port: number, controlSocket?: string) => {
   if (controlSocket) {
     const resolved = path.isAbsolute(controlSocket) ? controlSocket : path.resolve(root, controlSocket)
     return { controlDir: path.dirname(resolved), controlSocket: resolved }
@@ -91,7 +86,6 @@ const createControlPaths = async (
   const filename = `.${shortName}-${port}.sock`
   return { controlDir: root, controlSocket: path.join(root, filename) }
 }
-
 
 type RunningServer = {
   id: string

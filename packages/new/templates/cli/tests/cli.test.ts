@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'bun:test'
 import path from 'node:path'
+import { describe, expect, it } from 'bun:test'
 
 const CLI_PATH = path.join(import.meta.dir, '..', 'src', 'index.ts')
 

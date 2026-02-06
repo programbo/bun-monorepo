@@ -1,5 +1,13 @@
 import path from 'node:path'
-import { ensureTargetDir, ensureTemplates, run, runQaInit, runWorkspaceInstall, ROOT_DIR, updatePackageName } from './utils'
+import {
+  ensureTargetDir,
+  ensureTemplates,
+  run,
+  runQaInit,
+  runWorkspaceInstall,
+  ROOT_DIR,
+  updatePackageName,
+} from './utils'
 
 export const metadata = {
   defaultRoot: 'packages',
