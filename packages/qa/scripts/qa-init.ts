@@ -231,7 +231,7 @@ const ensurePackageJson = async (dir: string, pkg: Record<string, unknown>, kind
   const devDependencies = (pkg.devDependencies ?? {}) as Record<string, string>
 
   applyQaScripts(scripts, kind)
-  applyQaDevDependencies(devDependencies)
+  applyQaDevDependencies(devDependencies, kind)
   await writePackageJson({ devDependencies, dir, pkg, scripts })
 }
 
@@ -338,8 +338,11 @@ const applyQaScripts = (scripts: Record<string, string>, kind: Exclude<Kind, 'au
   }
 }
 
-const applyQaDevDependencies = (devDependencies: Record<string, string>) => {
+const applyQaDevDependencies = (devDependencies: Record<string, string>, kind: Exclude<Kind, 'auto'>) => {
   devDependencies['@bun-monorepo-template/qa'] = 'workspace:*'
+  if (kind !== 'web') {
+    devDependencies.bunup = 'latest'
+  }
 }
 
 interface PackageJsonUpdate {
@@ -371,7 +374,7 @@ const updateOxlintConfig = async (configPath: string) => {
     extendsField.push('@bun-monorepo-template/qa/oxlint')
   }
 
-  config.$schema = './node_modules/oxlint/configuration_schema.json'
+  config.$schema = '../../node_modules/oxlint/configuration_schema.json'
   config.extends = extendsField
   await writeJson(configPath, config)
 }

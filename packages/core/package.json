@@ -11,7 +11,8 @@
     "lint": "oxlint --config oxlint.json --fix .",
     "format": "prettier --config prettier.config.cjs --write .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "bun test"
+    "test": "bun test",
+    "build": "bunup"
   },
   "devDependencies": {
     "@bun-monorepo-template/qa": "workspace:*",
