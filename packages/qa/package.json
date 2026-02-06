@@ -11,14 +11,17 @@
     "./tsconfig/node": "./tsconfig/tsconfig.node.json",
     "./tsconfig/web": "./tsconfig/tsconfig.web.json",
     "./tsconfig/react-lib": "./tsconfig/tsconfig.react-lib.json",
-    "./testkit": "./src/testkit/index.ts"
+    "./testkit": "./src/testkit/index.ts",
+    "./logger": "./src/logger/index.ts",
+    "./logger/*": "./src/logger/*.ts"
   },
   "files": [
     "dist",
     "oxlint",
     "prettier",
     "tsconfig",
-    "src/testkit"
+    "src/testkit",
+    "src/logger"
   ],
   "scripts": {
     "build": "bunup",
@@ -37,5 +40,12 @@
     "prettier": "latest",
     "prettier-plugin-tailwindcss": "latest",
     "typescript": "latest"
+  },
+  "typesVersions": {
+    "": {
+      "logger/*": [
+        "src/logger/*"
+      ]
+    }
   }
 }

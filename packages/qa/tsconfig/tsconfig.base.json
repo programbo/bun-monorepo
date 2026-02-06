@@ -15,6 +15,10 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "resolveJsonModule": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "paths": {
+      "@bun-monorepo-template/qa/logger": ["./src/logger/index.ts"],
+      "@bun-monorepo-template/qa/logger/*": ["./src/logger/*"]
+    }
   }
 }
