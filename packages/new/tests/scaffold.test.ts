@@ -48,6 +48,7 @@ describe('@bun-monorepo-template/new scaffolds', () => {
   const bunTmpDir = path.join(tmpRoot, 'bun-tmp')
 
   const webDir = path.join(tmpRoot, 'apps', 'web-fixture')
+  const apiDir = path.join(tmpRoot, 'apps', 'api-fixture')
   const cliDir = path.join(tmpRoot, 'packages', 'cli-fixture')
   const libDir = path.join(tmpRoot, 'packages', 'lib-fixture')
   const uiDir = path.join(tmpRoot, 'packages', 'ui-fixture')
@@ -63,6 +64,11 @@ describe('@bun-monorepo-template/new scaffolds', () => {
     }
     await run(
       ['run', '@bun-monorepo-template/new', 'web', path.relative(ROOT_DIR, webDir), '--no-install'],
+      ROOT_DIR,
+      env,
+    )
+    await run(
+      ['run', '@bun-monorepo-template/new', 'api', path.relative(ROOT_DIR, apiDir), '--no-install'],
       ROOT_DIR,
       env,
     )
@@ -122,6 +128,7 @@ describe('@bun-monorepo-template/new scaffolds', () => {
 
   it('scaffolds cli/lib/ui packages with QA config', async () => {
     const packages = [
+      { dir: apiDir, kind: 'api', tsconfig: '@bun-monorepo-template/qa/tsconfig/node', tailwind: false },
       { dir: cliDir, kind: 'cli', tsconfig: '@bun-monorepo-template/qa/tsconfig/node', tailwind: false },
       { dir: libDir, kind: 'lib', tsconfig: '@bun-monorepo-template/qa/tsconfig/node', tailwind: false },
       { dir: uiDir, kind: 'ui', tsconfig: '@bun-monorepo-template/qa/tsconfig/react-lib', tailwind: true },
@@ -135,6 +142,9 @@ describe('@bun-monorepo-template/new scaffolds', () => {
       ensureExists(path.join(dir, 'prettier.config.cjs'))
       ensureExists(path.join(dir, 'oxlint.json'))
       ensureExists(path.join(dir, 'tsconfig.json'))
+      if (pkgInfo.kind === 'api') {
+        ensureExists(path.join(dir, 'tests', 'api.test.ts'))
+      }
 
       const pkg = await readJson(path.join(dir, 'package.json'))
       const scripts = (pkg.scripts ?? {}) as Record<string, string>

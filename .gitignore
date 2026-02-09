@@ -3,6 +3,7 @@ node_modules
 
 # output
 out
+output
 dist
 *.tgz
 
@@ -29,6 +30,9 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # IntelliJ based IDEs
 .idea
+
+# Codex local environment/config
+.codex/
 
 # Finder (MacOS) folder config
 .DS_Store

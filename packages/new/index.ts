@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { metadata as apiMeta, scaffoldApi } from './scaffolders/api'
 import { metadata as cliMeta, scaffoldCli } from './scaffolders/cli'
 import { metadata as libMeta, scaffoldLib } from './scaffolders/lib'
 import { metadata as uiMeta, scaffoldUi } from './scaffolders/ui'
@@ -7,10 +8,11 @@ import { metadata as webMeta, scaffoldWeb } from './scaffolders/web'
 
 const USAGE = `
 Usage:
-  bun run new <type> [name] [--no-install]
+  bun new <type> [name] [--no-install]
 
 Types:
   web   Creates a Bun React + Tailwind app in apps/<name>
+  api   Creates a Bun + Hono API app in apps/<name>
   cli   Creates a CLI package in packages/<name>
   lib   Creates a library package in packages/<name>
   ui    Creates a Tailwind UI library in packages/<name> (via bun create)
@@ -24,7 +26,7 @@ const main = async () => {
     process.exit(1)
   }
 
-  if (!['web', 'cli', 'lib', 'ui'].includes(typeArg)) {
+  if (!['web', 'api', 'cli', 'lib', 'ui'].includes(typeArg)) {
     throw new Error(`Unsupported type: ${typeArg}`)
   }
 
@@ -32,6 +34,7 @@ const main = async () => {
   const nameArg = rest.find((arg) => !arg.startsWith('-')) ?? type
   const metadata: Record<AppType, { defaultRoot: 'apps' | 'packages' }> = {
     web: webMeta,
+    api: apiMeta,
     cli: cliMeta,
     lib: libMeta,
     ui: uiMeta,
@@ -42,6 +45,7 @@ const main = async () => {
   const options = { install }
   const handlers: Record<AppType, (dir: string, options: { install: boolean }) => Promise<void>> = {
     web: scaffoldWeb,
+    api: scaffoldApi,
     cli: scaffoldCli,
     lib: scaffoldLib,
     ui: scaffoldUi,

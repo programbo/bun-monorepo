@@ -6,6 +6,7 @@ Scaffold apps and packages with consistent defaults.
 
 ```bash
 bun run @bun-monorepo-template/new web my-app
+bun run @bun-monorepo-template/new api my-api
 bun run @bun-monorepo-template/new cli my-cli
 bun run @bun-monorepo-template/new lib my-lib
 bun run @bun-monorepo-template/new ui packages/neon-ui-2026
@@ -14,6 +15,7 @@ bun run @bun-monorepo-template/new ui packages/neon-ui-2026
 ## What It Does
 
 - `web`: `apps/<name>` via `bun init --react=tailwind`, then replaces the UI and runs `qa:init`.
+- `api`: `apps/<name>` from local templates, then runs `qa:init`.
 - `cli`: `packages/<name>` from local templates, then runs `qa:init`.
 - `lib`: `packages/<name>` from local templates, then runs `qa:init`.
 - `ui`: `packages/<name>` from local templates, then runs `qa:init` with Tailwind.

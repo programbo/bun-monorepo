@@ -22,7 +22,7 @@ Then open `http://localhost:3000/`.
 - **Default `web` app**: React + Tailwind, Bun dev server, hot reload, and a health‑checked startup with smart port handling.
 - **Seamless dev server takeover**: If a matching app is already running on the default port, the @bun-monorepo-template/new process gracefully stops it and takes over without manual cleanup.
 - **`packages/new`**: Scaffolds apps and packages with the repo’s QA defaults baked in.  
-  Run: `bun run @bun-monorepo-template/new`
+  Run: `bun run @bun-monorepo-template/new <web|api|cli|lib|ui>`
 - **`packages/qa`**: Shared lint/format/typecheck configs and scripts used by every workspace.  
   Run: `bun run qa`
 

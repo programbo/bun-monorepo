@@ -15,6 +15,7 @@ const readJson = async (filePath: string) => JSON.parse(await readFile(filePath,
 describe('@bun-monorepo-template/new templates', () => {
   it('includes required templates', async () => {
     expect(existsSync(template('web'))).toBeTrue()
+    expect(existsSync(template('api'))).toBeTrue()
     expect(existsSync(template('cli'))).toBeTrue()
     expect(existsSync(template('lib'))).toBeTrue()
     expect(existsSync(template('ui'))).toBeTrue()
@@ -24,6 +25,12 @@ describe('@bun-monorepo-template/new templates', () => {
     expect(existsSync(path.join(template('web'), 'package.json'))).toBeTrue()
     expect(existsSync(path.join(template('web'), 'src', 'App.tsx'))).toBeTrue()
     expect(existsSync(path.join(template('web'), 'src', 'index.ts'))).toBeTrue()
+  })
+
+  it('api template contains expected files', async () => {
+    expect(existsSync(path.join(template('api'), 'package.json'))).toBeTrue()
+    expect(existsSync(path.join(template('api'), 'src', 'index.ts'))).toBeTrue()
+    expect(existsSync(path.join(template('api'), 'tests', 'api.test.ts'))).toBeTrue()
   })
 
   it('cli template has bunup build', async () => {

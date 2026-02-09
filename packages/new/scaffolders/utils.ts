@@ -2,7 +2,7 @@ import { copyFile, mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
-export type AppType = 'web' | 'cli' | 'lib' | 'ui'
+export type AppType = 'web' | 'api' | 'cli' | 'lib' | 'ui'
 export type DefaultRoot = 'apps' | 'packages'
 
 export const ROOT_DIR = path.resolve(import.meta.dir, '../../..')

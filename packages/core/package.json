@@ -17,6 +17,7 @@
   "devDependencies": {
     "@bun-monorepo-template/qa": "workspace:*",
     "@types/bun": "latest",
-    "@types/node": "latest"
+    "@types/node": "latest",
+    "bunup": "latest"
   }
 }
