@@ -2,6 +2,8 @@
 
 Bun CLI package template.
 
+Built on [Clerc](https://www.npmjs.com/package/clerc) for commands, flags, help, and completions.
+
 ## Dev
 
 ```bash
@@ -18,4 +20,11 @@ bun run build
 
 ```bash
 bun run --cwd packages/qa qa:init --dir . --kind cli
+```
+
+## Try It
+
+```bash
+bun run src/index.ts --help
+bun run src/index.ts greet bun
 ```

@@ -11,6 +11,9 @@
     "build": "bunup",
     "postinstall": "bun run scripts/postinstall.ts"
   },
+  "dependencies": {
+    "clerc": "1.2.1"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "latest",

@@ -54,8 +54,8 @@ test('debug glob patterns', () => {
   debug('mycli:project:list')('ok')
   debug('mycli:user')('ok')
   debug('mycli:admin')('nope')
-  expect(stdout.join('')).toMatchInlineSnapshot(
-    `"DEBUG [mycli:project:list] ok namespace=mycli:project:list\nDEBUG [mycli:user] ok namespace=mycli:user\n"`,
+  expect(stdout.join('')).toBe(
+    'DEBUG [mycli:project:list] ok namespace=mycli:project:list\nDEBUG [mycli:user] ok namespace=mycli:user\n',
   )
 })
 
@@ -67,13 +67,11 @@ test('withDebug emits timing', async () => {
     return calls === FIRST_CALL ? START : END
   }
   await withDebug('batch', () => 'ok')
-  expect(stdout.join('')).toMatchInlineSnapshot(
-    `"DEBUG [batch] start namespace=batch\nDEBUG [batch] done +500ms namespace=batch\n"`,
-  )
+  expect(stdout.join('')).toBe('DEBUG [batch] start namespace=batch\nDEBUG [batch] done +500ms namespace=batch\n')
 })
 
 test('debug is silent when disabled', () => {
   logger.init?.({ debugNamespaces: [] })
   debug('nope')('silent')
-  expect(stdout.join('')).toMatchInlineSnapshot(`""`)
+  expect(stdout.join('')).toBe('')
 })

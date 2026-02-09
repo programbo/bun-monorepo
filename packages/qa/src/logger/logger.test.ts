@@ -75,12 +75,12 @@ const OUTPUT_CASES = [
     json: false,
   },
   {
-    expected: '{"level":"info","timestamp":1700000000000,"msg":"Test","count":42}\n',
+    expected: '{"level":"info","msg":"Test","timestamp":1700000000000,"count":42}\n',
     isTTY: true,
     json: true,
   },
   {
-    expected: '{"level":"info","timestamp":1700000000000,"msg":"Test","count":42}\n',
+    expected: '{"level":"info","msg":"Test","timestamp":1700000000000,"count":42}\n',
     isTTY: false,
     json: true,
   },
@@ -95,14 +95,14 @@ test.each(OUTPUT_CASES)('output modes $isTTY/$json', ({ isTTY, json, expected })
   setTTY(process.stdout, isTTY, stdoutDesc)
   logger.init?.({ json })
   logger.info('Test', { count: COUNT })
-  expect(stdout.join('')).toMatchInlineSnapshot(`${expected}`)
+  expect(stdout.join('')).toBe(expected)
 })
 
 test('warn/error go to stderr', () => {
   logger.warn('Warn', { count: WARN_COUNT })
   logger.error('Error', { count: ERROR_COUNT })
-  expect(stdout.join('')).toMatchInlineSnapshot(`""`)
-  expect(stderr.join('')).toMatchInlineSnapshot(`"WARN Warn count=1\nERROR Error count=2\n"`)
+  expect(stdout.join('')).toBe('')
+  expect(stderr.join('')).toBe('WARN Warn count=1\nERROR Error count=2\n')
 })
 
 test('respects log level filtering', () => {
@@ -110,6 +110,6 @@ test('respects log level filtering', () => {
   logger.debug('no')
   logger.info('no')
   logger.warn('yes')
-  expect(stdout.join('')).toMatchInlineSnapshot(`""`)
-  expect(stderr.join('')).toMatchInlineSnapshot(`"WARN yes\n"`)
+  expect(stdout.join('')).toBe('')
+  expect(stderr.join('')).toBe('WARN yes\n')
 })

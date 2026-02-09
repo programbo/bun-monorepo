@@ -9,13 +9,14 @@
     "format": "prettier --config prettier.config.cjs --write .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "build": "bunup",
-    "test": "bun test"
+    "test": "bun test tests/scaffold.test.ts tests/templates.test.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "latest",
     "@bun-monorepo-template/qa": "workspace:*",
-    "bunup": "latest"
+    "bunup": "latest",
+    "clerc": "1.2.1"
   },
   "peerDependencies": {
     "typescript": "^5"

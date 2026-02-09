@@ -8,7 +8,7 @@ import { metadata as webMeta, scaffoldWeb } from './scaffolders/web'
 
 const USAGE = `
 Usage:
-  bun new <type> [name] [--no-install]
+  bun new <type> [name] [--no-install] [options]
 
 Types:
   web   Creates a Bun React + Tailwind app in apps/<name>
@@ -16,7 +16,20 @@ Types:
   cli   Creates a CLI package in packages/<name>
   lib   Creates a library package in packages/<name>
   ui    Creates a Tailwind UI library in packages/<name> (via bun create)
+
+CLI options:
+  --tui                 Scaffold an Ink-based TUI CLI
+  --tui=fullscreen      Scaffold a full-screen Ink TUI CLI (via fullscreen-ink)
 `.trim()
+
+type CliTuiOption = 'ink' | 'fullscreen'
+
+const parseCliTui = (raw: string | undefined): CliTuiOption | undefined => {
+  if (!raw) return 'ink'
+  if (raw === 'fullscreen') return 'fullscreen'
+  if (raw === 'ink') return 'ink'
+  throw new Error(`Invalid --tui value: ${raw}`)
+}
 
 const main = async () => {
   const args = process.argv.slice(2)
@@ -31,7 +44,41 @@ const main = async () => {
   }
 
   const type = typeArg as AppType
-  const nameArg = rest.find((arg) => !arg.startsWith('-')) ?? type
+  let install = true
+  let cliTui: CliTuiOption | undefined
+  const positional: string[] = []
+
+  for (let index = 0; index < rest.length; index++) {
+    const arg = rest[index]
+    if (!arg) continue
+
+    if (arg === '--no-install') {
+      install = false
+      continue
+    }
+
+    if (arg === '--tui') {
+      const next = rest[index + 1]
+      if (next && !next.startsWith('-')) {
+        cliTui = parseCliTui(next)
+        index++
+      } else {
+        cliTui = parseCliTui(undefined)
+      }
+      continue
+    }
+
+    if (arg.startsWith('--tui=')) {
+      cliTui = parseCliTui(arg.slice('--tui='.length))
+      continue
+    }
+
+    if (!arg.startsWith('-')) {
+      positional.push(arg)
+    }
+  }
+
+  const nameArg = positional[0] ?? type
   const metadata: Record<AppType, { defaultRoot: 'apps' | 'packages' }> = {
     web: webMeta,
     api: apiMeta,
@@ -41,14 +88,17 @@ const main = async () => {
   }
 
   const targetDir = resolveTarget(nameArg, metadata[type].defaultRoot)
-  const install = !rest.includes('--no-install')
   const options = { install }
   const handlers: Record<AppType, (dir: string, options: { install: boolean }) => Promise<void>> = {
     web: scaffoldWeb,
     api: scaffoldApi,
-    cli: scaffoldCli,
+    cli: (dir, baseOptions) => scaffoldCli(dir, { ...baseOptions, tui: cliTui }),
     lib: scaffoldLib,
     ui: scaffoldUi,
+  }
+
+  if (type !== 'cli' && cliTui) {
+    throw new Error('--tui is only supported for `bun new cli`')
   }
 
   await handlers[type](targetDir, options)

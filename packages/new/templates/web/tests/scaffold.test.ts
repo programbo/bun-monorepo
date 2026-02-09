@@ -1,7 +1,9 @@
 import path from 'node:path'
+import { existsSync } from 'node:fs'
 import { describe, expect, it } from 'bun:test'
 
 const ROOT_DIR = path.resolve(import.meta.dir, '..')
+const isScaffolded = existsSync(path.join(ROOT_DIR, 'prettier.config.cjs'))
 
 const readText = async (segments: string[]) => {
   const filePath = path.join(ROOT_DIR, ...segments)
@@ -20,14 +22,16 @@ const includesQaDependency = (deps?: Record<string, string>) => {
 }
 
 describe('scaffolded app', () => {
-  it('updates the package name', async () => {
+  const testIt = isScaffolded ? it : it.skip
+
+  testIt('updates the package name', async () => {
     const pkg = await readJson<{ name?: string }>(['package.json'])
     expect(pkg.name).toBeDefined()
     expect(pkg.name?.startsWith('@')).toBe(true)
     expect(pkg.name?.includes('/')).toBe(true)
   })
 
-  it('installs QA scripts and dev dependency', async () => {
+  testIt('installs QA scripts and dev dependency', async () => {
     const pkg = await readJson<{ scripts?: Record<string, string>; devDependencies?: Record<string, string> }>([
       'package.json',
     ])
@@ -37,7 +41,7 @@ describe('scaffolded app', () => {
     expect(includesQaDependency(pkg.devDependencies)).toBe(true)
   })
 
-  it('writes QA config files', async () => {
+  testIt('writes QA config files', async () => {
     const pkg = await readJson<{ devDependencies?: Record<string, string> }>(['package.json'])
     const qaPackage =
       Object.keys(pkg.devDependencies ?? {}).find((name) => name.endsWith('/qa')) ?? '@bun-monorepo-template/qa'
@@ -50,12 +54,12 @@ describe('scaffolded app', () => {
     expect(tsconfig).toContain(`${qaPackage}/tsconfig/web`)
   })
 
-  it('resets the App component content', async () => {
+  testIt('resets the App component content', async () => {
     const app = await readText(['src', 'App.tsx'])
     expect(app).toContain('This is a fresh Bun + React + Tailwind app.')
   })
 
-  it('uses serveWithControl after postinstall', async () => {
+  testIt('uses serveWithControl after postinstall', async () => {
     const index = await readText(['src', 'index.ts'])
     expect(index).toContain('serveWithControl')
   })

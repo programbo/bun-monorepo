@@ -72,5 +72,10 @@ test('spinner non-tty lifecycle', () => {
   setTTY(false)
   const spin = new Spinner('Build').start()
   spin.fail()
-  expect(stdout.join('')).toMatchInlineSnapshot(`"Build...\\n[fail] Build\\n"`)
+  const output = stdout
+    .join('')
+    .replaceAll('\r', String.raw`\r`)
+    .replaceAll('\n', String.raw`\n`)
+    .replaceAll(ESC, String.raw`\x1b`)
+  expect(output).toMatchInlineSnapshot(`"Build...\\n[fail] Build\\n"`)
 })

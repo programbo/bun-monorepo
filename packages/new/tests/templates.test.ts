@@ -3,10 +3,11 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'bun:test'
 
-const ROOT_DIR = path.resolve(import.meta.dir, '../..')
-const TEMPLATES_DIR = path.join(ROOT_DIR, 'templates')
-const BUN_CREATE = path.join(ROOT_DIR, '..', '.bun-create')
-const POSTINSTALL = path.join(ROOT_DIR, 'scripts', 'postinstall.ts')
+const PACKAGE_DIR = path.resolve(import.meta.dir, '..')
+const REPO_ROOT = path.resolve(PACKAGE_DIR, '../..')
+const TEMPLATES_DIR = path.join(PACKAGE_DIR, 'templates')
+const BUN_CREATE = path.join(REPO_ROOT, '.bun-create')
+const POSTINSTALL = path.join(PACKAGE_DIR, 'scripts', 'postinstall.ts')
 
 const template = (name: string) => path.join(TEMPLATES_DIR, name)
 
@@ -61,7 +62,7 @@ describe('@bun-monorepo-template/new templates', () => {
     }
 
     const proc = Bun.spawn(['bun', POSTINSTALL], {
-      cwd: ROOT_DIR,
+      cwd: PACKAGE_DIR,
       stdout: 'ignore',
       stderr: 'pipe',
     })

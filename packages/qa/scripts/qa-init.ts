@@ -259,6 +259,10 @@ const resolveTsconfigPreset = (kind: Exclude<Kind, 'auto'>, pkg: Record<string, 
   if (kind === 'web') {
     return '@bun-monorepo-template/qa/tsconfig/web'
   }
+  // CLI packages may use React (e.g. Ink) but still want "node" defaults (no DOM libs).
+  if (kind === 'cli') {
+    return '@bun-monorepo-template/qa/tsconfig/node'
+  }
   const isReact = detectReact(pkg)
   if (isReact) {
     return '@bun-monorepo-template/qa/tsconfig/react-lib'

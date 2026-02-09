@@ -22,13 +22,22 @@ describe('cli', () => {
     const { exitCode, stdout, stderr } = await runCli(['--help'])
     expect(exitCode).toBe(0)
     expect(stderr).toBe('')
-    expect(stdout).toContain('Usage: cli')
+    expect(stdout).toContain('Usage')
+    expect(stdout).toContain('cli')
   })
 
-  it('prints default message', async () => {
+  it('prints help when no command is specified', async () => {
     const { exitCode, stdout, stderr } = await runCli([])
     expect(exitCode).toBe(0)
     expect(stderr).toBe('')
-    expect(stdout).toContain('Hello from your CLI')
+    expect(stdout).toContain('No command specified')
+    expect(stdout).toContain('Usage')
+  })
+
+  it('runs greet', async () => {
+    const { exitCode, stdout, stderr } = await runCli(['greet', 'bun'])
+    expect(exitCode).toBe(0)
+    expect(stderr).toBe('')
+    expect(stdout).toContain('Hello, bun!')
   })
 })
