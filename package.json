@@ -13,7 +13,7 @@
     "typecheck": "bun run --workspaces --if-present typecheck",
     "format": "bun run --workspaces --if-present format",
     "qa": "bun run lint && bun run typecheck && bun run format",
-    "new": "bun run packages/new/index.ts"
+    "new": "bun run packages/_new/index.ts"
   },
   "devDependencies": {
     "@bun-monorepo-template/qa": "workspace:*",

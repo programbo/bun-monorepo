@@ -1,5 +1,5 @@
 {
-  "name": "@bun-monorepo-template/new",
+  "name": "new",
   "module": "index.ts",
   "type": "module",
   "private": true,

@@ -4,17 +4,9 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 
 const ROOT_DIR = path.resolve(import.meta.dir, '../../..')
-const TEMPLATE_SOURCE = path.resolve(
-  ROOT_DIR,
-  'packages',
-  'new',
-  'templates',
-  'web',
-  'src',
-  'dev',
-  'serve-with-control.ts',
-)
-const TEMPLATE_INDEX = path.resolve(ROOT_DIR, 'packages', 'new', 'templates', 'web', 'src', 'index.ts')
+const PACKAGE_DIR = path.resolve(import.meta.dir, '..')
+const TEMPLATE_SOURCE = path.resolve(PACKAGE_DIR, 'templates', 'web', 'src', 'dev', 'serve-with-control.ts')
+const TEMPLATE_INDEX = path.resolve(PACKAGE_DIR, 'templates', 'web', 'src', 'index.ts')
 
 const USAGE = `
 Usage:

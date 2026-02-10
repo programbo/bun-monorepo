@@ -5,7 +5,7 @@ import path from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test'
 
 const REPO_ROOT = path.resolve(import.meta.dir, '../../..')
-const NEW_POSTINSTALL = path.join(REPO_ROOT, 'packages', 'new', 'scripts', 'postinstall.ts')
+const NEW_POSTINSTALL = path.join(REPO_ROOT, 'packages', '_new', 'scripts', 'postinstall.ts')
 const BUN_CREATE = path.join(REPO_ROOT, '.bun-create')
 
 const readJson = async (filePath: string) => JSON.parse(await readFile(filePath, 'utf8')) as Record<string, unknown>
@@ -43,9 +43,9 @@ const ensureExtends = (value: unknown, expected: string) => {
   throw new Error(`Expected extends to include ${expected}`)
 }
 
-describe('@bun-monorepo-template/new scaffolds', () => {
+describe('new scaffolds', () => {
   const runId = randomUUID()
-  const tmpRoot = path.join(REPO_ROOT, '.tmp', `@bun-monorepo-template/new-scaffolds-${runId}`)
+  const tmpRoot = path.join(REPO_ROOT, '.tmp', `new-scaffolds-${runId}`)
   const bunTmpDir = path.join(tmpRoot, 'bun-tmp')
 
   const webDir = path.join(tmpRoot, 'apps', 'web-fixture')
@@ -79,29 +79,29 @@ describe('@bun-monorepo-template/new scaffolds', () => {
       BUN_NEW_WEB_TEMPLATE: '1',
     }
     await run(
-      ['run', 'packages/new/index.ts', 'web', path.relative(REPO_ROOT, webDir), '--no-install'],
+      ['run', 'packages/_new/index.ts', 'web', path.relative(REPO_ROOT, webDir), '--no-install'],
       REPO_ROOT,
       env,
     )
     await run(
-      ['run', 'packages/new/index.ts', 'api', path.relative(REPO_ROOT, apiDir), '--no-install'],
+      ['run', 'packages/_new/index.ts', 'api', path.relative(REPO_ROOT, apiDir), '--no-install'],
       REPO_ROOT,
       env,
     )
     await run(
-      ['run', 'packages/new/index.ts', 'cli', path.relative(REPO_ROOT, cliDir), '--no-install'],
+      ['run', 'packages/_new/index.ts', 'cli', path.relative(REPO_ROOT, cliDir), '--no-install'],
       REPO_ROOT,
       env,
     )
     await run(
-      ['run', 'packages/new/index.ts', 'cli', path.relative(REPO_ROOT, cliInkDir), '--no-install', '--tui'],
+      ['run', 'packages/_new/index.ts', 'cli', path.relative(REPO_ROOT, cliInkDir), '--no-install', '--tui'],
       REPO_ROOT,
       env,
     )
     await run(
       [
         'run',
-        'packages/new/index.ts',
+        'packages/_new/index.ts',
         'cli',
         path.relative(REPO_ROOT, cliFullscreenDir),
         '--no-install',
@@ -111,12 +111,12 @@ describe('@bun-monorepo-template/new scaffolds', () => {
       env,
     )
     await run(
-      ['run', 'packages/new/index.ts', 'lib', path.relative(REPO_ROOT, libDir), '--no-install'],
+      ['run', 'packages/_new/index.ts', 'lib', path.relative(REPO_ROOT, libDir), '--no-install'],
       REPO_ROOT,
       env,
     )
     await run(
-      ['run', 'packages/new/index.ts', 'ui', path.relative(REPO_ROOT, uiDir), '--no-install'],
+      ['run', 'packages/_new/index.ts', 'ui', path.relative(REPO_ROOT, uiDir), '--no-install'],
       REPO_ROOT,
       env,
     )

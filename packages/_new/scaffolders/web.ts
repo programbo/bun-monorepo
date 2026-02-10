@@ -27,11 +27,8 @@ export const scaffoldWeb = async (targetDir: string, options: { install: boolean
   await applyWebTemplateTests(targetDir)
   await runQaInit(targetDir, 'web', true)
   await updatePackageName(targetDir)
-  await run(
-    'bun',
-    ['run', 'packages/new/scripts/web-postinstall.ts', '--dir', path.relative(ROOT_DIR, targetDir)],
-    ROOT_DIR,
-  )
+  const webPostinstall = path.relative(ROOT_DIR, path.resolve(import.meta.dir, '..', 'scripts', 'web-postinstall.ts'))
+  await run('bun', ['run', webPostinstall, '--dir', path.relative(ROOT_DIR, targetDir)], ROOT_DIR)
   if (options.install) {
     await runWorkspaceInstall()
   }
