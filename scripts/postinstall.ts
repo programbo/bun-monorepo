@@ -72,7 +72,7 @@ const main = async () => {
   const rootPkgPath = path.join(ROOT_DIR, 'package.json')
   const qaPkgPath = path.join(ROOT_DIR, 'packages', 'qa', 'package.json')
   const corePkgPath = path.join(ROOT_DIR, 'packages', 'core', 'package.json')
-  const newPkgPath = path.join(ROOT_DIR, 'packages', 'new', 'package.json')
+  const newPkgPath = path.join(ROOT_DIR, 'packages', '_new', 'package.json')
 
   const rootPkg = existsSync(rootPkgPath) ? await readJson<Record<string, unknown>>(rootPkgPath) : {}
   const qaPkg = existsSync(qaPkgPath) ? await readJson<Record<string, unknown>>(qaPkgPath) : {}
@@ -83,8 +83,7 @@ const main = async () => {
   const newQaName = `@${projectName}/qa`
   const oldCoreName = resolveScopedName(corePkg.name, '@bun-monorepo-template/core')
   const newCoreName = `@${projectName}/core`
-  const oldNewName = resolveScopedName(newPkg.name, '@bun-monorepo-template/new')
-  const newNewName = `@${projectName}/new`
+  const newNewName = 'new'
 
   await updatePackageName(rootPkgPath, projectName)
   await updatePackageName(qaPkgPath, newQaName)
@@ -96,9 +95,6 @@ const main = async () => {
   ]
   if (oldCoreName !== newCoreName) {
     replacements.push([oldCoreName, newCoreName])
-  }
-  if (oldNewName !== newNewName) {
-    replacements.push([oldNewName, newNewName])
   }
 
   await walk(ROOT_DIR, replacements)

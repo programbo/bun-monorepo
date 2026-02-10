@@ -6,8 +6,9 @@ export type AppType = 'web' | 'api' | 'cli' | 'lib' | 'ui'
 export type DefaultRoot = 'apps' | 'packages'
 
 export const ROOT_DIR = path.resolve(import.meta.dir, '../../..')
+const PACKAGE_DIR = path.resolve(import.meta.dir, '..')
 export const BUN_CREATE_DIR = path.join(ROOT_DIR, '.bun-create')
-const WEB_TEMPLATE_DIR = path.join(ROOT_DIR, 'packages', 'new', 'templates', 'web')
+const WEB_TEMPLATE_DIR = path.join(PACKAGE_DIR, 'templates', 'web')
 
 export const run = async (command: string, args: string[], cwd: string) => {
   const proc = Bun.spawn([command, ...args], {
@@ -115,7 +116,7 @@ export const ensureTargetDir = async (targetDir: string) => {
 export const ensureTemplates = () => {
   if (!existsSync(BUN_CREATE_DIR)) {
     throw new Error(
-      'Missing .bun-create directory at repo root. Run bun install or bun run -w @bun-monorepo-template/new postinstall.',
+      'Missing .bun-create directory at repo root. Run bun install at the repo root to create it.',
     )
   }
 }

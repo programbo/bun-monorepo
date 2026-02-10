@@ -34,6 +34,9 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # Codex local environment/config
 .codex/
 
+# Bun create templates (created via postinstall)
+.bun-create
+
 # Finder (MacOS) folder config
 .DS_Store
 

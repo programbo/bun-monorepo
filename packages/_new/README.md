@@ -1,15 +1,15 @@
-# @bun-monorepo-template/new
+# new
 
 Scaffold apps and packages with consistent defaults.
 
 ## TL;DR
 
 ```bash
-bun run @bun-monorepo-template/new web my-app
-bun run @bun-monorepo-template/new api my-api
-bun run @bun-monorepo-template/new cli my-cli
-bun run @bun-monorepo-template/new lib my-lib
-bun run @bun-monorepo-template/new ui packages/neon-ui-2026
+bun new web my-app
+bun new api my-api
+bun new cli my-cli
+bun new lib my-lib
+bun new ui packages/neon-ui-2026
 ```
 
 ## What It Does
@@ -26,5 +26,6 @@ bun run @bun-monorepo-template/new ui packages/neon-ui-2026
 ## Notes
 
 - You can pass a full path like `packages/foo` to control the destination.
-- Templates live in `packages/new/templates` and are exposed via the `.bun-create` symlink.
+- Templates live in `packages/_new/templates` and are exposed via the `.bun-create` symlink.
+- `.bun-create` is created via postinstall and should not be committed.
 - Set `BUN_NEW_WEB_TEMPLATE=1` to scaffold web apps from the local template (useful for tests/offline work).
