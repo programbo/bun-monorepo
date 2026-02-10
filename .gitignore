@@ -37,6 +37,9 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # Bun create templates (created via postinstall)
 .bun-create
 
+# playwright-cli session/config
+.playwright-cli/
+
 # Finder (MacOS) folder config
 .DS_Store
 

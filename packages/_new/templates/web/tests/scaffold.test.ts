@@ -1,5 +1,5 @@
-import path from 'node:path'
 import { existsSync } from 'node:fs'
+import path from 'node:path'
 import { describe, expect, it } from 'bun:test'
 
 const ROOT_DIR = path.resolve(import.meta.dir, '..')

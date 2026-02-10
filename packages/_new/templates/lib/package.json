@@ -12,7 +12,8 @@
   },
   "scripts": {
     "dev": "bunup --watch",
-    "build": "bunup"
+    "build": "bunup",
+    "postinstall": "bun run scripts/postinstall.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

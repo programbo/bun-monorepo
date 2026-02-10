@@ -115,11 +115,7 @@ describe('new scaffolds', () => {
       REPO_ROOT,
       env,
     )
-    await run(
-      ['run', 'packages/_new/index.ts', 'ui', path.relative(REPO_ROOT, uiDir), '--no-install'],
-      REPO_ROOT,
-      env,
-    )
+    await run(['run', 'packages/_new/index.ts', 'ui', path.relative(REPO_ROOT, uiDir), '--no-install'], REPO_ROOT, env)
   })
 
   afterAll(async () => {

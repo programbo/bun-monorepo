@@ -1,11 +1,26 @@
 import path from 'node:path'
-import { fetchJson, fetchText, expectStatus } from '@bun-monorepo-template/qa/testkit'
-import { startServer } from '@bun-monorepo-template/qa/testkit'
-import { writeArtifact, writeJsonArtifact } from '@bun-monorepo-template/qa/testkit'
-import { waitForOutput } from '@bun-monorepo-template/qa/testkit'
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test'
 
 const ROOT_DIR = path.resolve(import.meta.dir, '..')
+
+const readJson = async <T>(filePath: string) => {
+  const contents = await Bun.file(filePath).text()
+  return JSON.parse(contents) as T
+}
+
+const resolveQaPackageName = async () => {
+  const pkg = await readJson<{ dependencies?: Record<string, string>; devDependencies?: Record<string, string> }>(
+    path.join(ROOT_DIR, 'package.json'),
+  )
+  const deps = { ...pkg.dependencies, ...pkg.devDependencies }
+  return Object.keys(deps).find((name) => name.endsWith('/qa')) ?? '@bun-monorepo-template/qa'
+}
+
+const qaPackageName = await resolveQaPackageName()
+const testkit = await import(`${qaPackageName}/testkit`)
+
+const { fetchJson, fetchText, expectStatus, startServer, waitForOutput, writeArtifact, writeJsonArtifact } =
+  testkit as any
 
 describe('web server', () => {
   let server: Awaited<ReturnType<typeof startServer>>
