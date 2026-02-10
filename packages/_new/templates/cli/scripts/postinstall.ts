@@ -6,6 +6,7 @@ import path from 'node:path'
 const PACKAGE_DIR = path.resolve(import.meta.dir, '..')
 const REPO_ROOT = path.resolve(PACKAGE_DIR, '../..')
 const QA_DIR = path.join(REPO_ROOT, 'packages', 'qa')
+const QA_TEMPLATE_DIR = path.join(REPO_ROOT, '.bun-create', 'qa')
 
 const readJson = async <TData>(filePath: string): Promise<TData> => {
   const contents = await readFile(filePath, 'utf8')
@@ -49,9 +50,16 @@ const ensureCoreDependency = async () => {
   await writeJson(packageJsonPath, pkg)
 }
 
+const ensureQaPackage = async () => {
+  if (existsSync(QA_DIR)) return
+  if (!existsSync(QA_TEMPLATE_DIR)) return
+  await run('bun', ['create', 'qa', 'packages/qa', '--no-install', '--no-git'], REPO_ROOT)
+}
+
 const main = async () => {
   await ensureCoreDependency()
 
+  await ensureQaPackage()
   if (!existsSync(QA_DIR)) return
 
   await run('bun', ['run', '--cwd', QA_DIR, 'qa:init', '--dir', PACKAGE_DIR, '--kind', 'cli'], REPO_ROOT)

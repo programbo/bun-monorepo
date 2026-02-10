@@ -115,9 +115,7 @@ export const ensureTargetDir = async (targetDir: string) => {
 
 export const ensureTemplates = () => {
   if (!existsSync(BUN_CREATE_DIR)) {
-    throw new Error(
-      'Missing .bun-create directory at repo root. Run bun install at the repo root to create it.',
-    )
+    throw new Error('Missing .bun-create directory at repo root. Run bun install at the repo root to create it.')
   }
 }
 

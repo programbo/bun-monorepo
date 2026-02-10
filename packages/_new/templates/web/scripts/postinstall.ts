@@ -15,6 +15,19 @@ const writeJson = async (filePath: string, data: unknown) => {
   await writeFile(filePath, contents, 'utf8')
 }
 
+const run = async (command: string, args: string[], cwd: string) => {
+  const proc = Bun.spawn([command, ...args], {
+    cwd,
+    stdin: 'inherit',
+    stdout: 'inherit',
+    stderr: 'inherit',
+  })
+  const exitCode = await proc.exited
+  if (exitCode !== 0) {
+    throw new Error(`Command failed: ${command} ${args.join(' ')}`)
+  }
+}
+
 const findWorkspaceRoot = async (startDir: string) => {
   let current = startDir
   while (true) {
@@ -147,11 +160,33 @@ const ensureCoreDependency = async () => {
   await writeJson(packageJsonPath, pkg)
 }
 
+const ensureQaPackage = async (workspaceRoot: string) => {
+  const qaDir = path.join(workspaceRoot, 'packages', 'qa')
+  if (existsSync(qaDir)) return qaDir
+
+  const qaTemplateDir = path.join(workspaceRoot, '.bun-create', 'qa')
+  if (!existsSync(qaTemplateDir)) return null
+
+  await run('bun', ['create', 'qa', 'packages/qa', '--no-install', '--no-git'], workspaceRoot)
+  return existsSync(qaDir) ? qaDir : null
+}
+
+const runQaInit = async () => {
+  const workspaceRoot = await findWorkspaceRoot(ROOT_DIR)
+  if (!workspaceRoot) return
+
+  const qaDir = await ensureQaPackage(workspaceRoot)
+  if (!qaDir) return
+
+  await run('bun', ['run', '--cwd', qaDir, 'qa:init', '--dir', ROOT_DIR, '--kind', 'web', '--tailwind'], workspaceRoot)
+}
+
 const main = async () => {
   await updateAppContent()
   await removeExtras()
   await updateIndex()
   await ensureCoreDependency()
+  await runQaInit()
 }
 
 main().catch((error) => {

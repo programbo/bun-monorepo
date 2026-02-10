@@ -20,6 +20,7 @@ describe('new templates', () => {
     expect(existsSync(template('cli'))).toBeTrue()
     expect(existsSync(template('lib'))).toBeTrue()
     expect(existsSync(template('ui'))).toBeTrue()
+    expect(existsSync(template('qa'))).toBeTrue()
   })
 
   it('web template contains expected files', async () => {

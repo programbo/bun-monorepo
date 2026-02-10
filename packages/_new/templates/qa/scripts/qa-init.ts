@@ -245,9 +245,7 @@ const ensurePrettierConfig = async (dir: string, tailwind: boolean, force: boole
   const target = resolvePrettierTarget(tailwind, qaPackageName)
   const contents = `module.exports = require('${target}')\n`
   const wrote = await writeIfMissing(configPath, contents, force)
-  if (wrote || force) {
-    return
-  }
+  if (wrote || force) return
 
   // If a config exists but points at a different `*/qa/prettier*`, update it.
   const existing = await readFile(configPath, 'utf8')
@@ -503,9 +501,7 @@ const resolveTailwind = (tailwind: boolean | undefined, pkg: Record<string, unkn
 
 const resolveQaPackageName = async () => {
   const pkgPath = path.resolve(import.meta.dir, '..', 'package.json')
-  if (!existsSync(pkgPath)) {
-    return '@bun-monorepo-template/qa'
-  }
+  if (!existsSync(pkgPath)) return '@bun-monorepo-template/qa'
   try {
     const pkg = await readJson<{ name?: unknown }>(pkgPath)
     return typeof pkg.name === 'string' && pkg.name.length > 0 ? pkg.name : '@bun-monorepo-template/qa'
